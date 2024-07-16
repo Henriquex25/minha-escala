@@ -1,21 +1,12 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import Routes from "./src/routes";
+import { NativeWindStyleSheet } from "nativewind";
+
+NativeWindStyleSheet.setOutput({
+  default: "native",
+});
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text className="text-blue-500">Hello World!</Text>
-      <StatusBar style="light" />
-    </View>
+    <Routes />
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#282c34',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: '#d1d5db',
-  },
-});
