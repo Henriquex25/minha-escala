@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TouchableOpacity, View, Text } from "react-native";
+import { TouchableOpacity, View, Text, Platform, ToastAndroid } from "react-native";
 import { Checkbox, TextInput } from "react-native-paper";
 import { storage } from "../../../Storage";
 import Label from "../../../components/Label";
@@ -41,6 +41,10 @@ export default function EmployeeCreateForm({ hideModal = () => {} }) {
         });
 
         storage.set("employees", JSON.stringify(employees));
+
+        if (Platform.OS === "android") {
+            ToastAndroid.show("Funcionário adicionado com sucesso ✓", ToastAndroid.SHORT);
+        }
 
         hideModal();
     }

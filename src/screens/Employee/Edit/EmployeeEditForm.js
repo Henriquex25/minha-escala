@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TouchableOpacity, View, Text } from "react-native";
+import { TouchableOpacity, View, Text, Platform, ToastAndroid } from "react-native";
 import { Checkbox, TextInput } from "react-native-paper";
 import { storage } from "../../../Storage";
 import Label from "../../../components/Label";
@@ -40,6 +40,10 @@ export default function EmployeeEditForm({ employee, navigation, hideModal = () 
         employees[employeeIndex] = newEmployeeData;
 
         storage.set("employees", JSON.stringify(employees));
+
+        if (Platform.OS === "android") {
+            ToastAndroid.show("Dados atualizados com sucesso ✓", ToastAndroid.SHORT);
+        }
 
         navigation.goBack();
     }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { View, FlatList, Text } from "react-native";
+import { View, FlatList, Text, Platform, ToastAndroid } from "react-native";
 import { Menu, Icon, IconButton } from "react-native-paper";
 import { storage } from "../../../Storage";
 import Dialog from "../../../components/Dialog";
@@ -41,6 +41,10 @@ export default function EmployeeList({ navigation }) {
         const employeeIndex = employees.findIndex((e) => e.id === employeeIdToDelete);
         employees.splice(employeeIndex, 1);
         storage.set("employees", JSON.stringify(employees));
+
+        if (Platform.OS === "android") {
+            ToastAndroid.show("Funcionário excluído com sucesso ✓", ToastAndroid.SHORT);
+        }
 
         hideDialog();
     }
