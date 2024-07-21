@@ -2,11 +2,16 @@ import { useState } from "react";
 import { BottomNavigation as RNBottomNavigation, Text } from "react-native-paper";
 import HomeScreen from "../screens/HomeScreen";
 import GenerateScaleScreen from "../screens/GenerateScaleScreen";
-import EmployeesScreen from "../screens/EmployeesScreen";
+import EmployeesIndex from "../screens/Employee/EmployeesIndex";
+import { useNavigation } from "@react-navigation/native";
 
 const HomeRoute = () => <HomeScreen />;
 const GenerateScaleRoute = () => <GenerateScaleScreen />;
-const EmployeesRoute = () => <EmployeesScreen />;
+const EmployeesRoute = () => {
+    const navigation = useNavigation();
+
+    return <EmployeesIndex navigation={navigation} />;
+};
 
 const Routes = () => {
     const [index, setIndex] = useState(0);

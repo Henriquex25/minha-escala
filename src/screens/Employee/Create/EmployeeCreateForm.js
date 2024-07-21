@@ -1,10 +1,15 @@
 import { useState } from "react";
 import { TouchableOpacity, View, Text } from "react-native";
 import { Checkbox, TextInput } from "react-native-paper";
-import Label from "../Label";
+import { storage } from "../../../Storage";
+import Label from "../../../components/Label";
 
-export default function CreateEmployee() {
-    const [receptionC, setReceptionC] = useState("");
+export default function EmployeeCreateForm({ hideModal = () => {} }) {
+    const [name, setName] = useState("");
+    const [leadership, setLeadership] = useState(false);
+    const [firstReference, setFirstReference] = useState(false);
+    const [secondReference, setSecondReference] = useState(false);
+    const [receptionC, setReceptionC] = useState(false);
     const [receptionG, setReceptionG] = useState(false);
     const [medicalSupport, setMedicalSupport] = useState(false);
     const [observation, setObservation] = useState(false);
@@ -12,9 +17,93 @@ export default function CreateEmployee() {
     const [fastCollect, setFastCollect] = useState(false);
     const [concierge, setConcierge] = useState(false);
 
+    function saveEmployee() {
+        const existingEmployees = storage.getString("employees");
+        let employees = existingEmployees ? JSON.parse(existingEmployees) : [];
+        const lastItem = employees.slice(-1);
+        const lastId = lastItem.length > 0 ? lastItem[0].id : 0;
+
+        employees.push({
+            id: lastId + 1,
+            name: name,
+            leadership: leadership,
+            firstReference: firstReference,
+            secondReference: secondReference,
+            sectors: {
+                receptionC: receptionC,
+                receptionG: receptionG,
+                medicalSupport: medicalSupport,
+                observation: observation,
+                fastCLM: fastCLM,
+                fastCollect: fastCollect,
+                concierge: concierge,
+            },
+        });
+
+        storage.set("employees", JSON.stringify(employees));
+
+        hideModal();
+    }
+
     return (
         <>
-            <TextInput label="Nome" style={{ backgroundColor: "#3a3a40", marginBottom: 20 }} />
+            <Label label="Nome" />
+            <TextInput label="Nome" value={name} onChangeText={setName} style={{ backgroundColor: "#3a3a40", marginBottom: 20 }} />
+
+            {/* Liderança e referências */}
+            <Label label="Liderança e referências" />
+            <View className="flex flex-row flex-wrap mb-3">
+                {/* Liderança */}
+                <View className="w-5/12 flex flex-row items-center">
+                    <Checkbox
+                        status={leadership ? "checked" : "unchecked"}
+                        onPress={() => {
+                            setLeadership(!leadership);
+                        }}
+                    />
+                    <Label
+                        label="Liderança"
+                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
+                        onPress={() => {
+                            setLeadership(!leadership);
+                        }}
+                    />
+                </View>
+
+                {/* Primeira referência */}
+                <View className="w-5/12 flex flex-row items-center">
+                    <Checkbox
+                        status={firstReference ? "checked" : "unchecked"}
+                        onPress={() => {
+                            setFirstReference(!firstReference);
+                        }}
+                    />
+                    <Label
+                        label="1ª Referência"
+                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
+                        onPress={() => {
+                            setFirstReference(!firstReference);
+                        }}
+                    />
+                </View>
+
+                {/* Segunda referência */}
+                <View className="w-5/12 flex flex-row items-center">
+                    <Checkbox
+                        status={secondReference ? "checked" : "unchecked"}
+                        onPress={() => {
+                            setSecondReference(!secondReference);
+                        }}
+                    />
+                    <Label
+                        label="2ª Referência"
+                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
+                        onPress={() => {
+                            setSecondReference(!secondReference);
+                        }}
+                    />
+                </View>
+            </View>
 
             {/* Setores */}
             <Label label="Setores" />
@@ -139,8 +228,21 @@ export default function CreateEmployee() {
                 </View>
             </View>
 
+            {/* Botão de voltar */}
+            <TouchableOpacity
+                activeOpacity={0.78}
+                className="mt-7 w-full bg-gray-600 h-12 rounded-3xl flex justify-center items-center"
+                onPress={hideModal}
+            >
+                <Text className="text-gray-200 text-center text-lg">Voltar</Text>
+            </TouchableOpacity>
+
             {/* Botão de salvar */}
-            <TouchableOpacity activeOpacity={0.78} className="mt-7 w-full bg-primary-600 h-12 rounded-3xl flex justify-center items-center">
+            <TouchableOpacity
+                activeOpacity={0.78}
+                className="mt-3 w-full bg-primary-600 h-12 rounded-3xl flex justify-center items-center"
+                onPress={saveEmployee}
+            >
                 <Text className="text-gray-200 text-center text-lg">Adicionar</Text>
             </TouchableOpacity>
         </>

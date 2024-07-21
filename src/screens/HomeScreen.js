@@ -1,12 +1,13 @@
-import { Text, View } from 'react-native'
-import Body from '../components/layout/Body'
+import { Text, View, StatusBar } from "react-native";
+import Body from "../components/layout/Body";
 
 export default function HomeScreen() {
     return (
         <Body>
+            <StatusBar barStyle="light-content" backgroundColor="#2a2a2e" />
+
             <View className="text-gray-400">
                 <View className="mx-auto bg-gray-600 w-full px-5 rounded-xl pt-2">
-
                     {/* Header */}
                     <View>
                         <Text className="text-center text-2xl font-bold text-gray-200">Dimensionamento</Text>
@@ -55,5 +56,5 @@ export default function HomeScreen() {
                 </View>
             </View>
         </Body>
-    )
+    );
 }

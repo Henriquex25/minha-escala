@@ -1,8 +1,6 @@
-import { Text, View } from "react-native";
+import { StatusBar, View } from "react-native";
 import Body from "../components/layout/Body";
 import DateTimeInput from "../components/form/DateTimeInput";
-import { globalStyle } from "../globalStyle";
-import Select from "../components/form/Select";
 import { SegmentedButtons } from "react-native-paper";
 import { useState } from "react";
 import Title from "../components/layout/Title";
@@ -13,6 +11,7 @@ export default function GenerateScaleScreen() {
 
     return (
         <Body>
+            <StatusBar barStyle="light-content" backgroundColor="#2a2a2e" />
             <View>
                 {/* Header */}
                 <View className="mb-3.5">
