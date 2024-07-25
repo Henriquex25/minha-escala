@@ -6,20 +6,14 @@ import { useState } from "react";
 import Title from "../../components/layout/Title";
 import Label from "../../components/Label";
 import GenerateScaleDaysOffList from "./DaysOff/GenerateScaleDaysOffList";
+import GenerateScaleMedicalCertificateList from "./MedicalCertificate/GenerateScaleMedicalCertificateList";
 
 export default function GenerateScaleIndex({ navigation }) {
     const [sequenceDays, setSequenceDays] = useState("odd");
     const [showingDaysOffModal, setShowingDaysOffModal] = useState(false);
+    const [showingMedicalCertificateModal, setShowingMedicalCertificateModal] = useState(false);
     const [initialDate, setInitialDate] = useState(new Date());
     const [finalDate, setFinalDate] = useState(new Date());
-
-    function showDaysOffModal() {
-        setShowingDaysOffModal(true);
-    }
-
-    function hideDaysOffModal() {
-        setShowingDaysOffModal(false);
-    }
 
     return (
         <Body>
@@ -63,14 +57,14 @@ export default function GenerateScaleIndex({ navigation }) {
 
                 {/* Folgas */}
                 <View className="mt-5">
-                    <Button icon="calendar-month-outline" mode="elevated" onPress={showDaysOffModal}>
+                    <Button icon="calendar-month-outline" mode="elevated" onPress={() => setShowingDaysOffModal(true)}>
                         Folgas
                     </Button>
                 </View>
 
                 {/* Atestados */}
                 <View className="mt-5">
-                    <Button icon="hospital-box-outline" mode="elevated" onPress={() => console.log("Pressed")}>
+                    <Button icon="hospital-box-outline" mode="elevated" onPress={() => setShowingMedicalCertificateModal(true)}>
                         Atestados
                     </Button>
                 </View>
@@ -90,7 +84,12 @@ export default function GenerateScaleIndex({ navigation }) {
                 </Button>
             </View>
 
-            <GenerateScaleDaysOffList visible={showingDaysOffModal} hideModal={hideDaysOffModal} navigation={navigation} />
+            <GenerateScaleDaysOffList visible={showingDaysOffModal} hideModal={() => setShowingDaysOffModal(false)} navigation={navigation} />
+            <GenerateScaleMedicalCertificateList
+                visible={showingMedicalCertificateModal}
+                hideModal={() => setShowingMedicalCertificateModal(false)}
+                navigation={navigation}
+            />
         </Body>
     );
 }

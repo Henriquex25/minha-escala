@@ -7,16 +7,16 @@ import Title from "../../../components/layout/Title";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Dialog from "../../../components/Dialog";
 
-export default function GenerateScaleDaysOffList({ visible = false, hideModal = () => {}, navigation = () => {} }) {
-    const [daysOff, setDaysOff] = useState([]);
+export default function GenerateScaleMedicalCertificateList({ visible = false, hideModal = () => {}, navigation = () => {} }) {
+    const [medicalCertificates, setMedicalCertificates] = useState([]);
     const [showingDeleteDialog, setShowingDeleteDialog] = useState(false);
     const [employeeIdToDelete, setEmployeeIdToDelete] = useState(0);
 
-    function deleteEmployeeDaysOff() {
+    function deleteEmployeeMedicalCertificates() {
         const generateScales = storage.getString("generate-scales");
         const generateScalesObj = generateScales ? JSON.parse(generateScales) : {};
 
-        generateScalesObj.daysOff = generateScalesObj.daysOff.filter((d) => d.employee.id !== employeeIdToDelete);
+        generateScalesObj.medicalCertificates = generateScalesObj.medicalCertificates.filter((d) => d.employee.id !== employeeIdToDelete);
 
         storage.set("generate-scales", JSON.stringify(generateScalesObj));
 
@@ -27,31 +27,34 @@ export default function GenerateScaleDaysOffList({ visible = false, hideModal = 
         return dts.map((d) => moment(d).format("DD/MM/YYYY")).join(", ");
     }
 
-    function fetchDaysOffToGenerateScales() {
-        const existingGenerateScales = storage.getString("generate-scales");
+    function fetchMedicalCertificatesToGenerateScales() {
+        const generateScales = storage.getString("generate-scales");
+        const generateScalesObs = generateScales ? JSON.parse(generateScales) : {};
 
-        const generateScales = existingGenerateScales ? JSON.parse(existingGenerateScales) : {};
-
-        if (Object.keys(generateScales).length === 0 || !generateScales.daysOff || generateScales.daysOff?.length === 0) {
-            setDaysOff([]);
+        if (
+            Object.keys(generateScalesObs).length === 0 ||
+            !generateScalesObs.medicalCertificates ||
+            generateScalesObs.medicalCertificates?.length === 0
+        ) {
+            setMedicalCertificates([]);
 
             return;
         }
 
-        setDaysOff(generateScales.daysOff);
+        setMedicalCertificates(generateScalesObs.medicalCertificates);
     }
 
     useEffect(() => {
         const listener = storage.addOnValueChangedListener((changedKey) => {
             if (changedKey === "generate-scales") {
-                fetchDaysOffToGenerateScales();
+                fetchMedicalCertificatesToGenerateScales();
             }
         });
 
         return () => listener.remove();
     }, []);
 
-    useEffect(() => fetchDaysOffToGenerateScales(), []);
+    useEffect(() => fetchMedicalCertificatesToGenerateScales(), []);
 
     return (
         <Portal>
@@ -61,16 +64,16 @@ export default function GenerateScaleDaysOffList({ visible = false, hideModal = 
                 className="px-2"
                 contentContainerStyle={{ backgroundColor: "#2a2a2e", padding: 20, borderRadius: 9 }}
             >
-                <Title title="Folgas" className="text-gray-400 mt-0" />
+                <Title title="Atestados" className="text-gray-400 mt-0" />
 
-                <Button mode="elevated" onPress={() => navigation.navigate("DaysOffCreate")} className="mb-2">
+                <Button mode="elevated" onPress={() => navigation.navigate("MedicalCertificatesCreate")} className="mb-2">
                     Adicionar
                 </Button>
 
-                {daysOff.length > 0 ? (
+                {medicalCertificates.length > 0 ? (
                     <View>
                         <FlatList
-                            data={daysOff}
+                            data={medicalCertificates}
                             renderItem={({ item }) => (
                                 <TouchableOpacity
                                     className="bg-default-3 pl-2.5 py-2 rounded-lg mb-2 whitespace-wrap text-wrap"
@@ -90,7 +93,7 @@ export default function GenerateScaleDaysOffList({ visible = false, hideModal = 
                         <Dialog
                             visible={showingDeleteDialog}
                             hideDialog={() => setShowingDeleteDialog(false)}
-                            onConfirm={deleteEmployeeDaysOff}
+                            onConfirm={deleteEmployeeMedicalCertificates}
                             message="Tem certeza que deseja excluir estas folgas?"
                         />
                     </View>
