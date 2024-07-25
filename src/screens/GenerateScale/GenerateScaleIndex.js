@@ -7,11 +7,13 @@ import Title from "../../components/layout/Title";
 import Label from "../../components/Label";
 import GenerateScaleDaysOffList from "./DaysOff/GenerateScaleDaysOffList";
 import GenerateScaleMedicalCertificateList from "./MedicalCertificate/GenerateScaleMedicalCertificateList";
+import GenerateScaleVacationList from "./Vacation/GenerateScaleVacationList";
 
 export default function GenerateScaleIndex({ navigation }) {
     const [sequenceDays, setSequenceDays] = useState("odd");
     const [showingDaysOffModal, setShowingDaysOffModal] = useState(false);
     const [showingMedicalCertificateModal, setShowingMedicalCertificateModal] = useState(false);
+    const [showingVacationModal, setShowingVacationModal] = useState(false);
     const [initialDate, setInitialDate] = useState(new Date());
     const [finalDate, setFinalDate] = useState(new Date());
 
@@ -71,7 +73,7 @@ export default function GenerateScaleIndex({ navigation }) {
 
                 {/* Férias */}
                 <View className="mt-5">
-                    <Button icon="hospital-box-outline" mode="elevated" onPress={() => console.log("Pressed")}>
+                    <Button icon="hospital-box-outline" mode="elevated" onPress={() => setShowingVacationModal(true)}>
                         Férias
                     </Button>
                 </View>
@@ -84,12 +86,14 @@ export default function GenerateScaleIndex({ navigation }) {
                 </Button>
             </View>
 
+            {/* Modais */}
             <GenerateScaleDaysOffList visible={showingDaysOffModal} hideModal={() => setShowingDaysOffModal(false)} navigation={navigation} />
             <GenerateScaleMedicalCertificateList
                 visible={showingMedicalCertificateModal}
                 hideModal={() => setShowingMedicalCertificateModal(false)}
                 navigation={navigation}
             />
+            <GenerateScaleVacationList visible={showingVacationModal} hideModal={() => setShowingVacationModal(false)} navigation={navigation} />
         </Body>
     );
 }

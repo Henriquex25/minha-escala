@@ -7,6 +7,7 @@ import EmployeeDetails from "./src/screens/Employee/Detail/EmployeeDetail";
 import EmployeeEdit from "./src/screens/Employee/Edit/EmployeeEdit";
 import GenerateScaleDaysOffCreate from "./src/screens/GenerateScale/DaysOff/Create/GenerateScaleDaysOffCreate";
 import GenerateScaleMedicalCertificateCreate from "./src/screens/GenerateScale/MedicalCertificate/Create/GenerateScaleMedicalCertificateCreate";
+import GenerateScaleVacationCreate from "./src/screens/GenerateScale/Vacation/Create/GenerateScaleVacationCreate";
 
 const Stack = createStackNavigator();
 
@@ -43,6 +44,7 @@ export default function App() {
                 <Stack.Screen name="EmployeeDetails" component={EmployeeDetails} options={{ title: "Detalhes" }} />
                 <Stack.Screen name="DaysOffCreate" component={GenerateScaleDaysOffCreate} options={{ title: "Adicionar folga" }} />
                 <Stack.Screen name="MedicalCertificatesCreate" component={GenerateScaleMedicalCertificateCreate} options={{ title: "Atestados" }} />
+                <Stack.Screen name="VacationCreate" component={GenerateScaleVacationCreate} options={{ title: "Férias" }} />
             </Stack.Navigator>
         </NavigationContainer>
     );

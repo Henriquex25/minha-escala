@@ -6,15 +6,15 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import moment from "moment";
 import Dialog from "../../../../components/Dialog";
 
-export default function GenerateScaleMedicalCertificateCreate({ navigation }) {
+export default function GenerateScaleVacationCreate({ navigation }) {
     const [searchQuery, setSearchQuery] = useState("");
     const [employees, setEmployees] = useState([]);
     const [employeesFound, setEmployeesFound] = useState([]);
-    const [employeeSelectedToAddMedicalCertificate, setEmployeeSelectedToAddMedicalCertificate] = useState({});
+    const [employeeSelectedToAddVacation, setEmployeeSelectedToAddvacationToBeRemovedCertificate] = useState({});
     const [showingDate, setShowingDate] = useState(false);
-    const [medicalCertificatesSelected, setMedicalCertificatesSelected] = useState([]);
+    const [VacationSelected, setVacationSelected] = useState([]);
     const [showingDeleteDialog, setShowingDeleteDialog] = useState(false);
-    const [medicalCertificateToBeRemoved, setMedicalCertificateToBeRemoved] = useState(null);
+    const [vacationToBeRemovedCertificateToBeRemoved, setvacationToBeRemovedCertificateToBeRemoved] = useState(null);
 
     function getGenerateScale() {
         const existingGenerateScales = storage.getString("generate-scales");
@@ -22,56 +22,52 @@ export default function GenerateScaleMedicalCertificateCreate({ navigation }) {
         return existingGenerateScales ? JSON.parse(existingGenerateScales) : {};
     }
 
-    function getMedicalCertificatesIfTheEmployeeAlreadyHasPreviousMedicalCertificatesPreSelected(employeeId) {
+    function getvacationToBeRemovedCertificatesIfTheEmployeeAlreadyHasPreviousvacationToBeRemovedCertificatesPreSelected(employeeId) {
         const generateScales = getGenerateScale();
-        const employeeIndex = getIndexIfEmployeeAlreadyHasPreSelectedMedicalCertificate(employeeId);
+        const employeeIndex = getIndexIfEmployeeAlreadyHasPreSelectedVacation(employeeId);
 
         if (employeeIndex > -1) {
-            setMedicalCertificatesSelected(generateScales.medicalCertificates[employeeIndex].dates);
+            setVacationSelected(generateScales.vacation[employeeIndex].dates);
             return;
         }
 
-        setMedicalCertificatesSelected([]);
+        setVacationSelected([]);
     }
 
-    function getIndexIfEmployeeAlreadyHasPreSelectedMedicalCertificate(employeeId = null) {
+    function getIndexIfEmployeeAlreadyHasPreSelectedVacation(employeeId = null) {
         const generateScales = getGenerateScale();
-        return (
-            generateScales.medicalCertificates?.findIndex(
-                (d) => d.employee.id === (employeeId ? employeeId : employeeSelectedToAddMedicalCertificate.id)
-            ) ?? -1
-        );
+        return generateScales.vacation?.findIndex((d) => d.employee.id === (employeeId ? employeeId : employeeSelectedToAddVacation.id)) ?? -1;
     }
 
-    function setMedicalCertificate(event, selectedDate) {
+    function setvacationToBeRemovedCertificate(event, selectedDate) {
         if (event.type === "dismissed") {
             setShowingDate(false);
             return;
         }
 
-        const existingData = medicalCertificatesSelected.some((d) => moment(d).isSame(selectedDate));
+        const existingData = VacationSelected.some((d) => moment(d).isSame(selectedDate));
         if (existingData) {
             setShowingDate(false);
             return;
         }
 
-        setMedicalCertificatesSelected([...medicalCertificatesSelected, selectedDate]);
+        setVacationSelected([...VacationSelected, selectedDate]);
 
         setShowingDate(false);
     }
 
-    function saveMedicalCertificates() {
-        if (medicalCertificatesSelected.length === 0) {
+    function savevacationToBeRemovedCertificates() {
+        if (VacationSelected.length === 0) {
             navigation.goBack();
             return;
         }
 
         const generateScales = getGenerateScale();
-        const indexMedicalCertificates = getIndexIfEmployeeAlreadyHasPreSelectedMedicalCertificate();
+        const indexvacationToBeRemovedCertificates = getIndexIfEmployeeAlreadyHasPreSelectedVacation();
 
         // Funcionário já possui dias de folga pre-selecionados
-        if (indexMedicalCertificates > -1) {
-            generateScales.medicalCertificates[indexMedicalCertificates].dates = [...medicalCertificatesSelected];
+        if (indexvacationToBeRemovedCertificates > -1) {
+            generateScales.vacation[indexvacationToBeRemovedCertificates].dates = [...VacationSelected];
 
             storage.set("generate-scales", JSON.stringify(generateScales));
             navigation.goBack();
@@ -79,14 +75,14 @@ export default function GenerateScaleMedicalCertificateCreate({ navigation }) {
         }
 
         const payload = {
-            employee: employeeSelectedToAddMedicalCertificate,
-            dates: medicalCertificatesSelected,
+            employee: employeeSelectedToAddVacation,
+            dates: VacationSelected,
         };
 
-        if (generateScales.medicalCertificates?.length) {
-            generateScales.medicalCertificates.push(payload);
+        if (generateScales.vacation?.length) {
+            generateScales.vacation.push(payload);
         } else {
-            generateScales.medicalCertificates = [payload];
+            generateScales.vacation = [payload];
         }
 
         console.log("generateScales", generateScales, "stringify", JSON.stringify(generateScales));
@@ -95,10 +91,10 @@ export default function GenerateScaleMedicalCertificateCreate({ navigation }) {
         navigation.goBack();
     }
 
-    function removeMedicalCertificate() {
-        if (!medicalCertificateToBeRemoved) return;
+    function removeVacation() {
+        if (!vacationToBeRemovedCertificateToBeRemoved) return;
 
-        setMedicalCertificatesSelected(medicalCertificatesSelected.filter((d) => !moment(d).isSame(medicalCertificateToBeRemoved)));
+        setVacationSelected(VacationSelected.filter((d) => !moment(d).isSame(vacationToBeRemovedCertificateToBeRemoved)));
 
         setShowingDeleteDialog(false);
     }
@@ -115,7 +111,7 @@ export default function GenerateScaleMedicalCertificateCreate({ navigation }) {
         <PaperProvider>
             <View className="px-5 mt-3">
                 {/* Buscar funcionário */}
-                {Object.keys(employeeSelectedToAddMedicalCertificate).length === 0 ? (
+                {Object.keys(employeeSelectedToAddVacation).length === 0 ? (
                     <View>
                         <Searchbar
                             placeholder="Pesquisar funcionário"
@@ -140,8 +136,10 @@ export default function GenerateScaleMedicalCertificateCreate({ navigation }) {
                                             textColor="#0ea5e9"
                                             className="w-full bg-default-2"
                                             onPress={() => {
-                                                setEmployeeSelectedToAddMedicalCertificate(item);
-                                                getMedicalCertificatesIfTheEmployeeAlreadyHasPreviousMedicalCertificatesPreSelected(item.id);
+                                                setEmployeeSelectedToAddvacationToBeRemovedCertificate(item);
+                                                getvacationToBeRemovedCertificatesIfTheEmployeeAlreadyHasPreviousvacationToBeRemovedCertificatesPreSelected(
+                                                    item.id
+                                                );
                                                 setSearchQuery("");
                                                 setEmployeesFound([]);
                                             }}
@@ -162,7 +160,7 @@ export default function GenerateScaleMedicalCertificateCreate({ navigation }) {
                     <View>
                         {/* Funcionário selecionado */}
                         <View className="relative">
-                            <Text className="text-primary-400 font-semibold text-lg text-center">{employeeSelectedToAddMedicalCertificate.name}</Text>
+                            <Text className="text-primary-400 font-semibold text-lg text-center">{employeeSelectedToAddVacation.name}</Text>
                         </View>
 
                         <Divider className="my-6 bg-primary-500/40" />
@@ -174,19 +172,19 @@ export default function GenerateScaleMedicalCertificateCreate({ navigation }) {
                             </TouchableOpacity>
                         </View>
 
-                        {showingDate && <DateTimePicker value={new Date()} mode="date" onChange={setMedicalCertificate} />}
+                        {showingDate && <DateTimePicker value={new Date()} mode="date" onChange={setvacationToBeRemovedCertificate} />}
 
                         {/* Lista de folgas escolhidas */}
-                        {medicalCertificatesSelected.length > 0 && (
+                        {VacationSelected.length > 0 && (
                             <View>
                                 <FlatList
-                                    data={medicalCertificatesSelected}
+                                    data={VacationSelected}
                                     renderItem={({ item }) => (
                                         <View>
                                             <TouchableOpacity
                                                 className="bg-default-2 mb-2 py-2.5 rounded-lg"
                                                 onLongPress={() => {
-                                                    setMedicalCertificateToBeRemoved(item);
+                                                    setvacationToBeRemovedCertificateToBeRemoved(item);
                                                     setShowingDeleteDialog(true);
                                                 }}
                                                 activeOpacity={0.78}
@@ -200,7 +198,12 @@ export default function GenerateScaleMedicalCertificateCreate({ navigation }) {
                                 />
 
                                 {/* Botão de salvar */}
-                                <Button className="mt-6 bg-primary-500" mode="elevated" onPress={saveMedicalCertificates} textColor="black">
+                                <Button
+                                    className="mt-6 bg-primary-500"
+                                    mode="elevated"
+                                    onPress={savevacationToBeRemovedCertificates}
+                                    textColor="black"
+                                >
                                     Salvar
                                 </Button>
 
@@ -208,7 +211,7 @@ export default function GenerateScaleMedicalCertificateCreate({ navigation }) {
                                 <Dialog
                                     visible={showingDeleteDialog}
                                     hideDialog={() => setShowingDeleteDialog(false)}
-                                    onConfirm={removeMedicalCertificate}
+                                    onConfirm={removeVacation}
                                     message="Tem certeza que deseja excluir esta folga?"
                                 />
                             </View>
