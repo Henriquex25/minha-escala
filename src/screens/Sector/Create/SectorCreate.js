@@ -1,7 +1,7 @@
 import { Portal, Modal } from "react-native-paper";
-import EmployeeCreateForm from "./EmployeeCreateForm";
+import SectorCreateForm from "./SectorCreateForm";
 
-export default function EmployeeCreate({ visible = false, hideModal = () => {} }) {
+export default function SectorCreate({ visible = false, hideModal = () => {} }) {
     return (
         <Portal>
             <Modal
@@ -10,7 +10,7 @@ export default function EmployeeCreate({ visible = false, hideModal = () => {} }
                 className="px-2"
                 contentContainerStyle={{ backgroundColor: "#2a2a2e", padding: 20, borderRadius: 9 }}
             >
-                <EmployeeCreateForm hideModal={hideModal} />
+                <SectorCreateForm hideModal={hideModal} />
             </Modal>
         </Portal>
     );

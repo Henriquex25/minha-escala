@@ -4,7 +4,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { TextInput } from "react-native-paper";
 import moment from "moment";
 
-export default function DateTimeInput({ value = new Date(), label = "", mode = "date", is24hour = true }) {
+export default function DateTimeInput({ value = new Date(), label = "", mode = "date", is24hour = true, onValueChange = () => {} }) {
     const [date, setDate] = useState(value);
     const [show, setShow] = useState(false);
 
@@ -14,12 +14,8 @@ export default function DateTimeInput({ value = new Date(), label = "", mode = "
         setDate(currentDate);
     };
 
-    const showMode = (currentMode) => {
-        setShow(true);
-    };
-
     const showDateTimepicker = () => {
-        showMode("date");
+        setShow(true);
     };
 
     return (
@@ -29,7 +25,9 @@ export default function DateTimeInput({ value = new Date(), label = "", mode = "
                 label={label}
                 onPress={showDateTimepicker}
                 right={<TextInput.Icon icon="calendar-month-outline" color={"#6b7280"} onPress={showDateTimepicker} />}
-                style={{ height: 58, backgroundColor: "#3a3a40" }}
+                style={{ height: 50, backgroundColor: "#3a3a40" }}
+                showSoftInputOnFocus={false}
+                onChangeText={onValueChange}
             />
             {show && <DateTimePicker value={date} mode={mode} is24Hour={is24hour} onChange={onChange} />}
         </SafeAreaView>

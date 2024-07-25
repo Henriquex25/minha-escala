@@ -4,7 +4,7 @@ import { Checkbox, TextInput } from "react-native-paper";
 import { storage } from "../../../Storage";
 import Label from "../../../components/Label";
 
-export default function EmployeeCreateForm({ hideModal = () => {} }) {
+export default function SectorCreateForm({ hideModal = () => {} }) {
     const [name, setName] = useState("");
     const [leadership, setLeadership] = useState(false);
     const [firstReference, setFirstReference] = useState(false);
