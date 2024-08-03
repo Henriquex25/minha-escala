@@ -24,24 +24,24 @@ export default function GenerateScaleIndex({ navigation }) {
     const [showActivityIndicator, setShowActivityIndicator] = useState(false);
 
     const scaleGenerationPopulationOrder = [
-        getObservation,
-        getFastCLM,
-        getFastMedication,
-        getFastCollect,
-        getConcierge,
-        getMedicalSupport,
-        getReceptionC,
-        getReceptionG,
+        getObservationEmployees,
+        getFastCLMEmployees,
+        getFastMedicationEmployees,
+        getFastCollectEmployees,
+        getConciergeEmployees,
+        getMedicalSupportEmployees,
+        getReceptionCEmployees,
+        getReceptionGEmployees,
     ];
 
     function generateScale() {
         setShowActivityIndicator(true);
 
         const scales = [];
-        const payload = getScaleGenerationData();
+        const scaleGenerationData = getScaleGenerationData();
         const dates = generateDates();
 
-        if (Object.keys(payload).length === 0) {
+        if (Object.keys(scaleGenerationData).length === 0) {
             // TODO: Mostrar erros de validação
             return;
         }
@@ -50,15 +50,37 @@ export default function GenerateScaleIndex({ navigation }) {
             let scale = { date: date };
 
             for (let i = 0; i < scaleGenerationPopulationOrder.length; i++) {
+                const availableEmployees = JSON.parse(storage.getString("employees") ?? [])
+                    .filter((e) => !scaleGenerationData.daysOff.some((d) => d.employee.id === e.id && d.dates.some((dayOff) => dayOff === date)))
+                    .filter(
+                        (e) =>
+                            !scaleGenerationData.medicalCertificates.some(
+                                (mc) => mc.employee.id === e.id && mc.dates.some((dayOff) => dayOff === date)
+                            )
+                    )
+                    .filter(
+                        (e) =>
+                            !scaleGenerationData.vacations.some((v) => {
+                                const dateOfTheScaleBeingGenerated = moment(date, "DD/MM/YYYY");
+                                const startDate = moment(v.startDate, "DD/MM/YYYY");
+                                const endDate = moment(v.endDate, "DD/MM/YYYY");
+
+                                return (
+                                    v.employee.id === e.id &&
+                                    dateOfTheScaleBeingGenerated.isSameOrAfter(startDate) &&
+                                    dateOfTheScaleBeingGenerated.isSameOrBefore(endDate)
+                                );
+                            })
+                    );
+
                 const getSectorEmployees = scaleGenerationPopulationOrder[i];
 
-                scale = getSectorEmployees(scale);
+                console.log(availableEmployees);
+                scale = getSectorEmployees(scale, date, scaleGenerationData);
             }
 
             scales.push(scale);
         });
-
-        console.log(scales);
 
         setShowActivityIndicator(false);
         setShowScaleGenerationDialog(false);
@@ -85,39 +107,37 @@ export default function GenerateScaleIndex({ navigation }) {
         return dates;
     }
 
-    function getObservation(scale) {
-        scale.observation = [{ name: "Fulano de tal" }];
-
+    function getObservationEmployees(scale, date, availableEmployees) {
         return scale;
     }
 
-    function getFastCLM(scale) {
+    function getFastCLMEmployees(scale) {
         scale.fastCLM = { name: "Ciclano" };
 
         return scale;
     }
 
-    function getFastMedication(scale) {
+    function getFastMedicationEmployees(scale) {
         return scale;
     }
 
-    function getFastCollect(scale) {
+    function getFastCollectEmployees(scale) {
         return scale;
     }
 
-    function getConcierge(scale) {
+    function getConciergeEmployees(scale) {
         return scale;
     }
 
-    function getMedicalSupport(scale) {
+    function getMedicalSupportEmployees(scale) {
         return scale;
     }
 
-    function getReceptionC(scale) {
+    function getReceptionCEmployees(scale) {
         return scale;
     }
 
-    function getReceptionG(scale) {
+    function getReceptionGEmployees(scale) {
         return scale;
     }
 

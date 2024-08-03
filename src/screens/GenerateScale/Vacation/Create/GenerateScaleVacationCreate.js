@@ -4,6 +4,7 @@ import { Button, Divider, Searchbar, Menu, PaperProvider } from "react-native-pa
 import { storage } from "../../../../Storage";
 import DateTimeInput from "../../../../components/form/DateTimeInput";
 import Label from "../../../../components/Label";
+import moment from "moment";
 
 export default function GenerateScaleVacationCreate({ navigation }) {
     const [searchQuery, setSearchQuery] = useState("");
@@ -56,8 +57,8 @@ export default function GenerateScaleVacationCreate({ navigation }) {
 
         const payload = {
             employee: employeeSelectedToAddVacation,
-            startDate: startDate,
-            endDate: endDate,
+            startDate: moment(startDate).format("DD/MM/YYYY"),
+            endDate: moment(endDate).format("DD/MM/YYYY"),
         };
 
         if (generateScales.vacations?.length) {

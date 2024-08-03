@@ -24,7 +24,7 @@ export default function GenerateScaleMedicalCertificateList({ visible = false, h
     }
 
     function plainTextDates(dts) {
-        return dts.map((d) => moment(d).format("DD/MM/YYYY")).join(", ");
+        return dts.join(", ");
     }
 
     function fetchMedicalCertificatesToGenerateScales() {
@@ -98,7 +98,7 @@ export default function GenerateScaleMedicalCertificateList({ visible = false, h
                         />
                     </View>
                 ) : (
-                    <Text className="text-gray-500 text-center">Nenhuma folga adicionada</Text>
+                    <Text className="text-gray-500 text-center">Nenhuma atestado adicionada</Text>
                 )}
             </Modal>
         </Portal>

@@ -76,7 +76,7 @@ export default function GenerateScaleDaysOffCreate({ navigation }) {
 
         const payload = {
             employee: employeeSelectedToAddDaysOff,
-            dates: daysOffSelected,
+            dates: daysOffSelected.map((d) => moment(d).format("DD/MM/YYYY")),
         };
 
         if (generateScales.daysOff?.length) {
@@ -85,7 +85,6 @@ export default function GenerateScaleDaysOffCreate({ navigation }) {
             generateScales.daysOff = [payload];
         }
 
-        console.log("generateScales", generateScales, "stringify", JSON.stringify(generateScales));
         storage.set("generate-scales", JSON.stringify(generateScales));
 
         navigation.goBack();

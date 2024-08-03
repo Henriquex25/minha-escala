@@ -3,6 +3,7 @@ import { SafeAreaView } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { TextInput } from "react-native-paper";
 import moment from "moment";
+import { globalStyle } from "../../globalStyle";
 
 export default function DateTimeInput({ value = new Date(), label = "", mode = "date", is24hour = true, onValueChange = () => {} }) {
     const [date, setDate] = useState(value);
@@ -33,6 +34,9 @@ export default function DateTimeInput({ value = new Date(), label = "", mode = "
                 right={<TextInput.Icon icon="calendar-month-outline" color={"#6b7280"} onPress={showDateTimepicker} />}
                 style={{ height: 50, backgroundColor: "#3a3a40" }}
                 showSoftInputOnFocus={false}
+                textColor={"#e5e7eb"}
+                underlineColor="#38bdf8"
+                activeUnderlineColor="#0369a1"
             />
             {show && <DateTimePicker value={date} mode={mode} is24Hour={is24hour} onChange={onChange} />}
         </SafeAreaView>

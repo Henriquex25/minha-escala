@@ -16,7 +16,7 @@ import Button from "../../components/Button";
 
 export default function HistoryIndex({ navigation }) {
     const [histories, setHistories] = useMMKVObject("histories");
-    const [visibleModal, setVisibleModal] = useState(false);
+    const [visibleModalTransferSectorEmployee, setVisibleModalTransferSectorEmployee] = useState(false);
     const [sectorsAvailableToChange, setSectorsAvailableToChange] = useState(sectors);
     const [payloadToChangeSectorEmployee, setPayloadToChangeSectorEmployee] = useState({});
 
@@ -71,7 +71,7 @@ export default function HistoryIndex({ navigation }) {
         his[toSectorIndex].employees = [...his[toSectorIndex].employees, employee];
 
         setHistories(his);
-        setVisibleModal(false);
+        setVisibleModalTransferSectorEmployee(false);
         setPayloadToChangeSectorEmployee({});
     }
 
@@ -101,7 +101,7 @@ export default function HistoryIndex({ navigation }) {
                                             fromSectorIndex: sectorIndex,
                                         });
                                         setSectorsAvailableToChange(sectors.filter((s) => s.id !== histories[sectorIndex].id));
-                                        setVisibleModal(true);
+                                        setVisibleModalTransferSectorEmployee(true);
                                     }}
                                 >
                                     <Icon source="dots-vertical" color="#0ea5e9" size={20} />
@@ -121,9 +121,9 @@ export default function HistoryIndex({ navigation }) {
             <View className="mt-3 border border-gray-500/50 p-2 rounded-lg relative">
                 <Label label={item.name} className="text-primary-400 font-semibold" style={{ fontSize: 16 }} />
 
-                <TouchableOpacity className="absolute -top-2 right-0 p-2" activeOpacity={0.78}>
+                {/* <TouchableOpacity className="absolute -top-2 right-0 p-2" activeOpacity={0.78}>
                     <IconButton icon="plus" size={20} iconColor="#0ea5e9" onPress={() => ""} />
-                </TouchableOpacity>
+                </TouchableOpacity> */}
 
                 <DraggableFlatList
                     data={item.employees}
@@ -152,8 +152,8 @@ export default function HistoryIndex({ navigation }) {
 
                 <Portal>
                     <Modal
-                        visible={visibleModal}
-                        onDismiss={() => setVisibleModal(false)}
+                        visible={visibleModalTransferSectorEmployee}
+                        onDismiss={() => setVisibleModalTransferSectorEmployee(false)}
                         className="px-2"
                         contentContainerStyle={{ backgroundColor: "#2a2a2e", padding: 20, borderRadius: 9 }}
                     >
@@ -170,7 +170,11 @@ export default function HistoryIndex({ navigation }) {
                         />
 
                         <View className="mt-4 w-full flex justify-end text-end">
-                            <TouchableOpacity activeOpacity={0.78} className="self-end px-3 py-2" onPress={() => setVisibleModal(false)}>
+                            <TouchableOpacity
+                                activeOpacity={0.78}
+                                className="self-end px-3 py-2"
+                                onPress={() => setVisibleModalTransferSectorEmployee(false)}
+                            >
                                 <Text className="text-gray-400">FECHAR</Text>
                             </TouchableOpacity>
                         </View>

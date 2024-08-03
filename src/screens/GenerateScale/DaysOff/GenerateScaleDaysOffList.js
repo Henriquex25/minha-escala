@@ -24,7 +24,7 @@ export default function GenerateScaleDaysOffList({ visible = false, hideModal = 
     }
 
     function plainTextDates(dts) {
-        return dts.map((d) => moment(d).format("DD/MM/YYYY")).join(", ");
+        return dts.join(", ");
     }
 
     function fetchDaysOffToGenerateScales() {

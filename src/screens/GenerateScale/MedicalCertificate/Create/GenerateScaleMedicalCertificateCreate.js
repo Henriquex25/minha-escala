@@ -80,7 +80,7 @@ export default function GenerateScaleMedicalCertificateCreate({ navigation }) {
 
         const payload = {
             employee: employeeSelectedToAddMedicalCertificate,
-            dates: medicalCertificatesSelected,
+            dates: medicalCertificatesSelected.map((d) => moment(d).format("DD/MM/YYYY")),
         };
 
         if (generateScales.medicalCertificates?.length) {
@@ -89,7 +89,6 @@ export default function GenerateScaleMedicalCertificateCreate({ navigation }) {
             generateScales.medicalCertificates = [payload];
         }
 
-        console.log("generateScales", generateScales, "stringify", JSON.stringify(generateScales));
         storage.set("generate-scales", JSON.stringify(generateScales));
 
         navigation.goBack();

@@ -23,10 +23,6 @@ export default function GenerateScaleVacationList({ visible = false, hideModal =
         setShowingDeleteDialog(false);
     }
 
-    function plainTextDates(vacation) {
-        return moment(vacation.startDate).format("DD/MM/YYYY") + "  até  " + moment(vacation.endDate).format("DD/MM/YYYY");
-    }
-
     function fetchVacationToGenerateScales() {
         const generateScales = storage.getString("generate-scales");
         const generateScalesObj = generateScales ? JSON.parse(generateScales) : {};
@@ -80,7 +76,7 @@ export default function GenerateScaleVacationList({ visible = false, hideModal =
                                     }}
                                 >
                                     <Text className="w-[30%] text-gray-200 truncate font-semibold">{item.employee.name}</Text>
-                                    <Text className="text-gray-300">{plainTextDates(item)}</Text>
+                                    <Text className="text-gray-300">{`${item.startDate}  até  ${item.endDate}`}</Text>
                                 </TouchableOpacity>
                             )}
                             keyExtractor={(item) => item.employee?.id ?? Math.random().toString()}
