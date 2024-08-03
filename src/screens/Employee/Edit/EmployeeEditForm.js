@@ -15,6 +15,7 @@ export default function EmployeeEditForm({ employee, navigation, hideModal = () 
     const [observation, setObservation] = useState(employee.sectors.observation);
     const [fastCLM, setFastCLM] = useState(employee.sectors.fastCLM);
     const [fastCollect, setFastCollect] = useState(employee.sectors.fastCollect);
+    const [fastMedication, setFastMedication] = useState(employee.sectors.fastMedication);
     const [concierge, setConcierge] = useState(employee.sectors.concierge);
 
     function saveEmployee() {
@@ -209,6 +210,23 @@ export default function EmployeeEditForm({ employee, navigation, hideModal = () 
                         style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
                         onPress={() => {
                             setFastCollect(!fastCollect);
+                        }}
+                    />
+                </View>
+
+                {/* Fast Medicação */}
+                <View className="w-5/12 flex flex-row items-center">
+                    <Checkbox
+                        status={fastMedication ? "checked" : "unchecked"}
+                        onPress={() => {
+                            setFastMedication(!fastMedication);
+                        }}
+                    />
+                    <Label
+                        label="Fast Medicação"
+                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
+                        onPress={() => {
+                            setFastMedication(!fastMedication);
                         }}
                     />
                 </View>

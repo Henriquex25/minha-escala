@@ -15,6 +15,7 @@ export default function SectorCreateForm({ hideModal = () => {} }) {
     const [observation, setObservation] = useState(false);
     const [fastCLM, setFastCLM] = useState(false);
     const [fastCollect, setFastCollect] = useState(false);
+    const [fastMedication, setFastMedication] = useState(false);
     const [concierge, setConcierge] = useState(false);
 
     function saveEmployee() {
@@ -210,6 +211,23 @@ export default function SectorCreateForm({ hideModal = () => {} }) {
                         style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
                         onPress={() => {
                             setFastCollect(!fastCollect);
+                        }}
+                    />
+                </View>
+
+                {/* Fast Medicação */}
+                <View className="w-5/12 flex flex-row items-center">
+                    <Checkbox
+                        status={fastMedication ? "checked" : "unchecked"}
+                        onPress={() => {
+                            setFastMedication(!fastMedication);
+                        }}
+                    />
+                    <Label
+                        label="Fast Medicação"
+                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
+                        onPress={() => {
+                            setFastMedication(!fastMedication);
                         }}
                     />
                 </View>

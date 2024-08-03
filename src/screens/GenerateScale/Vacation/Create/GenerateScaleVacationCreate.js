@@ -1,20 +1,19 @@
 import { useState, useEffect } from "react";
-import { View, Text, FlatList, TouchableOpacity } from "react-native";
+import { View, Text, FlatList } from "react-native";
 import { Button, Divider, Searchbar, Menu, PaperProvider } from "react-native-paper";
 import { storage } from "../../../../Storage";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import moment from "moment";
-import Dialog from "../../../../components/Dialog";
+import DateTimeInput from "../../../../components/form/DateTimeInput";
+import Label from "../../../../components/Label";
 
 export default function GenerateScaleVacationCreate({ navigation }) {
     const [searchQuery, setSearchQuery] = useState("");
     const [employees, setEmployees] = useState([]);
     const [employeesFound, setEmployeesFound] = useState([]);
-    const [employeeSelectedToAddVacation, setEmployeeSelectedToAddvacationToBeRemovedCertificate] = useState({});
-    const [showingDate, setShowingDate] = useState(false);
-    const [VacationSelected, setVacationSelected] = useState([]);
+    const [employeeSelectedToAddVacation, setEmployeeSelectedToAddVacation] = useState({});
+    const [startDate, setStartDate] = useState(new Date());
+    const [endDate, setEndDate] = useState(new Date());
     const [showingDeleteDialog, setShowingDeleteDialog] = useState(false);
-    const [vacationToBeRemovedCertificateToBeRemoved, setvacationToBeRemovedCertificateToBeRemoved] = useState(null);
+    const [vacationToBeRemovedCertificateToBeRemoved, setVacationToBeRemovedCertificateToBeRemoved] = useState(null);
 
     function getGenerateScale() {
         const existingGenerateScales = storage.getString("generate-scales");
@@ -22,52 +21,33 @@ export default function GenerateScaleVacationCreate({ navigation }) {
         return existingGenerateScales ? JSON.parse(existingGenerateScales) : {};
     }
 
-    function getvacationToBeRemovedCertificatesIfTheEmployeeAlreadyHasPreviousvacationToBeRemovedCertificatesPreSelected(employeeId) {
+    function getVacationStartDateIfThereIsPreviousPreSelectedVacation(employeeId) {
         const generateScales = getGenerateScale();
         const employeeIndex = getIndexIfEmployeeAlreadyHasPreSelectedVacation(employeeId);
 
         if (employeeIndex > -1) {
-            setVacationSelected(generateScales.vacation[employeeIndex].dates);
+            setStartDate(generateScales.vacations[employeeIndex].startDate);
             return;
         }
-
-        setVacationSelected([]);
     }
 
     function getIndexIfEmployeeAlreadyHasPreSelectedVacation(employeeId = null) {
         const generateScales = getGenerateScale();
-        return generateScales.vacation?.findIndex((d) => d.employee.id === (employeeId ? employeeId : employeeSelectedToAddVacation.id)) ?? -1;
+        return generateScales.vacations?.findIndex((d) => d.employee.id === (employeeId ? employeeId : employeeSelectedToAddVacation.id)) ?? -1;
     }
 
-    function setvacationToBeRemovedCertificate(event, selectedDate) {
-        if (event.type === "dismissed") {
-            setShowingDate(false);
-            return;
-        }
-
-        const existingData = VacationSelected.some((d) => moment(d).isSame(selectedDate));
-        if (existingData) {
-            setShowingDate(false);
-            return;
-        }
-
-        setVacationSelected([...VacationSelected, selectedDate]);
-
-        setShowingDate(false);
-    }
-
-    function savevacationToBeRemovedCertificates() {
-        if (VacationSelected.length === 0) {
-            navigation.goBack();
+    function saveVacationToGenerateScale() {
+        if (startDate.length === 0 || endDate.length === 0) {
             return;
         }
 
         const generateScales = getGenerateScale();
-        const indexvacationToBeRemovedCertificates = getIndexIfEmployeeAlreadyHasPreSelectedVacation();
+        const indexEmployeeToBeRemovedVacation = getIndexIfEmployeeAlreadyHasPreSelectedVacation();
 
         // Funcionário já possui dias de folga pre-selecionados
-        if (indexvacationToBeRemovedCertificates > -1) {
-            generateScales.vacation[indexvacationToBeRemovedCertificates].dates = [...VacationSelected];
+        if (indexEmployeeToBeRemovedVacation > -1) {
+            generateScales.vacations[indexEmployeeToBeRemovedVacation].startDate = startDate;
+            generateScales.vacations[indexEmployeeToBeRemovedVacation].endDate = endDate;
 
             storage.set("generate-scales", JSON.stringify(generateScales));
             navigation.goBack();
@@ -76,27 +56,19 @@ export default function GenerateScaleVacationCreate({ navigation }) {
 
         const payload = {
             employee: employeeSelectedToAddVacation,
-            dates: VacationSelected,
+            startDate: startDate,
+            endDate: endDate,
         };
 
-        if (generateScales.vacation?.length) {
-            generateScales.vacation.push(payload);
+        if (generateScales.vacations?.length) {
+            generateScales.vacations.push(payload);
         } else {
-            generateScales.vacation = [payload];
+            generateScales.vacations = [payload];
         }
 
-        console.log("generateScales", generateScales, "stringify", JSON.stringify(generateScales));
         storage.set("generate-scales", JSON.stringify(generateScales));
 
         navigation.goBack();
-    }
-
-    function removeVacation() {
-        if (!vacationToBeRemovedCertificateToBeRemoved) return;
-
-        setVacationSelected(VacationSelected.filter((d) => !moment(d).isSame(vacationToBeRemovedCertificateToBeRemoved)));
-
-        setShowingDeleteDialog(false);
     }
 
     function fetchEmployees() {
@@ -136,10 +108,8 @@ export default function GenerateScaleVacationCreate({ navigation }) {
                                             textColor="#0ea5e9"
                                             className="w-full bg-default-2"
                                             onPress={() => {
-                                                setEmployeeSelectedToAddvacationToBeRemovedCertificate(item);
-                                                getvacationToBeRemovedCertificatesIfTheEmployeeAlreadyHasPreviousvacationToBeRemovedCertificatesPreSelected(
-                                                    item.id
-                                                );
+                                                setEmployeeSelectedToAddVacation(item);
+                                                getVacationStartDateIfThereIsPreviousPreSelectedVacation(item.id);
                                                 setSearchQuery("");
                                                 setEmployeesFound([]);
                                             }}
@@ -165,57 +135,25 @@ export default function GenerateScaleVacationCreate({ navigation }) {
 
                         <Divider className="my-6 bg-primary-500/40" />
 
-                        {/* Dias */}
+                        {/* Escolher Dias */}
                         <View>
-                            <TouchableOpacity className="w-full" activeOpacity={0.78} onPress={() => setShowingDate(true)}>
-                                <Text className="text-center text-primary-500 font-semibold mb-6">ESCOLHER DATA</Text>
-                            </TouchableOpacity>
+                            {/* Data inicial */}
+                            <View>
+                                <Label label="Início" />
+                                <DateTimeInput value={startDate} onValueChange={(value) => setStartDate(value)} />
+                            </View>
+
+                            {/* Data final */}
+                            <View className="mt-5">
+                                <Label label="Fim" />
+                                <DateTimeInput value={endDate} onValueChange={(value) => setEndDate(value)} />
+                            </View>
                         </View>
 
-                        {showingDate && <DateTimePicker value={new Date()} mode="date" onChange={setvacationToBeRemovedCertificate} />}
-
-                        {/* Lista de folgas escolhidas */}
-                        {VacationSelected.length > 0 && (
-                            <View>
-                                <FlatList
-                                    data={VacationSelected}
-                                    renderItem={({ item }) => (
-                                        <View>
-                                            <TouchableOpacity
-                                                className="bg-default-2 mb-2 py-2.5 rounded-lg"
-                                                onLongPress={() => {
-                                                    setvacationToBeRemovedCertificateToBeRemoved(item);
-                                                    setShowingDeleteDialog(true);
-                                                }}
-                                                activeOpacity={0.78}
-                                            >
-                                                <Text className="text-primary-400 font-semibold text-center">
-                                                    {moment(item).format("DD/MM/YYYY")}
-                                                </Text>
-                                            </TouchableOpacity>
-                                        </View>
-                                    )}
-                                />
-
-                                {/* Botão de salvar */}
-                                <Button
-                                    className="mt-6 bg-primary-500"
-                                    mode="elevated"
-                                    onPress={savevacationToBeRemovedCertificates}
-                                    textColor="black"
-                                >
-                                    Salvar
-                                </Button>
-
-                                {/* Dialog de confirmação de exclusão */}
-                                <Dialog
-                                    visible={showingDeleteDialog}
-                                    hideDialog={() => setShowingDeleteDialog(false)}
-                                    onConfirm={removeVacation}
-                                    message="Tem certeza que deseja excluir esta folga?"
-                                />
-                            </View>
-                        )}
+                        {/* Lista de fol{/* Botão de salvar */}
+                        <Button className="mt-7 bg-primary-500" mode="elevated" onPress={saveVacationToGenerateScale} textColor="black">
+                            Salvar
+                        </Button>
                     </View>
                 )}
             </View>

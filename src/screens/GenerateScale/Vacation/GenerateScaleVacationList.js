@@ -8,7 +8,7 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import Dialog from "../../../components/Dialog";
 
 export default function GenerateScaleVacationList({ visible = false, hideModal = () => {}, navigation = () => {} }) {
-    const [vacation, setVacation] = useState([]);
+    const [vacations, setVacations] = useState([]);
     const [showingDeleteDialog, setShowingDeleteDialog] = useState(false);
     const [employeeIdToDelete, setEmployeeIdToDelete] = useState(0);
 
@@ -16,28 +16,28 @@ export default function GenerateScaleVacationList({ visible = false, hideModal =
         const generateScales = storage.getString("generate-scales");
         const generateScalesObj = generateScales ? JSON.parse(generateScales) : {};
 
-        generateScalesObj.vacation = generateScalesObj.vacation.filter((d) => d.employee.id !== employeeIdToDelete);
+        generateScalesObj.vacations = generateScalesObj.vacations.filter((d) => d.employee.id !== employeeIdToDelete);
 
         storage.set("generate-scales", JSON.stringify(generateScalesObj));
 
         setShowingDeleteDialog(false);
     }
 
-    function plainTextDates(dts) {
-        return dts.map((d) => moment(d).format("DD/MM/YYYY")).join(", ");
+    function plainTextDates(vacation) {
+        return moment(vacation.startDate).format("DD/MM/YYYY") + "  até  " + moment(vacation.endDate).format("DD/MM/YYYY");
     }
 
     function fetchVacationToGenerateScales() {
         const generateScales = storage.getString("generate-scales");
-        const generateScalesObs = generateScales ? JSON.parse(generateScales) : {};
+        const generateScalesObj = generateScales ? JSON.parse(generateScales) : {};
 
-        if (Object.keys(generateScalesObs).length === 0 || !generateScalesObs.vacation || generateScalesObs.vacation?.length === 0) {
-            setVacation([]);
+        if (Object.keys(generateScalesObj).length === 0 || !generateScalesObj.vacations || generateScalesObj.vacations?.length === 0) {
+            setVacations([]);
 
             return;
         }
 
-        setVacation(generateScalesObs.vacation);
+        setVacations(generateScalesObj.vacations);
     }
 
     useEffect(() => {
@@ -66,10 +66,10 @@ export default function GenerateScaleVacationList({ visible = false, hideModal =
                     Adicionar
                 </Button>
 
-                {vacation.length > 0 ? (
+                {vacations.length > 0 ? (
                     <View>
                         <FlatList
-                            data={vacation}
+                            data={vacations}
                             renderItem={({ item }) => (
                                 <TouchableOpacity
                                     className="bg-default-3 pl-2.5 py-2 rounded-lg mb-2 whitespace-wrap text-wrap"
@@ -80,7 +80,7 @@ export default function GenerateScaleVacationList({ visible = false, hideModal =
                                     }}
                                 >
                                     <Text className="w-[30%] text-gray-200 truncate font-semibold">{item.employee.name}</Text>
-                                    <Text className="text-gray-300">{plainTextDates(item.dates)}</Text>
+                                    <Text className="text-gray-300">{plainTextDates(item)}</Text>
                                 </TouchableOpacity>
                             )}
                             keyExtractor={(item) => item.employee?.id ?? Math.random().toString()}

@@ -9,9 +9,15 @@ export default function DateTimeInput({ value = new Date(), label = "", mode = "
     const [show, setShow] = useState(false);
 
     const onChange = (event, selectedDate) => {
+        if (event.type === "dismissed") {
+            setShow(false);
+            return;
+        }
+
         const currentDate = selectedDate;
         setShow(false);
         setDate(currentDate);
+        onValueChange(currentDate, event);
     };
 
     const showDateTimepicker = () => {
@@ -27,7 +33,6 @@ export default function DateTimeInput({ value = new Date(), label = "", mode = "
                 right={<TextInput.Icon icon="calendar-month-outline" color={"#6b7280"} onPress={showDateTimepicker} />}
                 style={{ height: 50, backgroundColor: "#3a3a40" }}
                 showSoftInputOnFocus={false}
-                onChangeText={onValueChange}
             />
             {show && <DateTimePicker value={date} mode={mode} is24Hour={is24hour} onChange={onChange} />}
         </SafeAreaView>

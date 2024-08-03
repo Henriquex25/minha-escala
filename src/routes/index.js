@@ -4,12 +4,12 @@ import HomeScreen from "../screens/HomeScreen";
 import GenerateScaleIndex from "../screens/GenerateScale/GenerateScaleIndex";
 import EmployeesIndex from "../screens/Employee/EmployeesIndex";
 import { useNavigation } from "@react-navigation/native";
-import SectorIndex from "../screens/Sector/SectorIndex";
+import HistoryIndex from "../screens/History/HistoryIndex";
 
 const HomeRoute = () => <HomeScreen />;
 const GenerateScaleRoute = () => <GenerateScaleIndex navigation={useNavigation()} />;
-// const SectorRoute = () => <SectorIndex navigation={useNavigation()} />;
 const EmployeeRoute = () => <EmployeesIndex navigation={useNavigation()} />;
+const HistoryRoute = () => <HistoryIndex navigation={useNavigation()} />;
 
 const Routes = () => {
     const [index, setIndex] = useState(0);
@@ -17,14 +17,14 @@ const Routes = () => {
         { key: "home", title: "Home", focusedIcon: "home", unfocusedIcon: "home-outline" },
         { key: "generateScale", title: "Gerar Escala", focusedIcon: "refresh" },
         { key: "employee", title: "Funcionários", focusedIcon: "account-multiple", unfocusedIcon: "account-multiple-outline" },
-        // { key: "sector", title: "Setores", focusedIcon: "clipboard-text", unfocusedIcon: "clipboard-text-outline" },
+        { key: "history", title: "Histórico", focusedIcon: "clock-time-five", unfocusedIcon: "clock-time-five-outline" },
     ]);
 
     const renderScene = RNBottomNavigation.SceneMap({
         home: HomeRoute,
         generateScale: GenerateScaleRoute,
         employee: EmployeeRoute,
-        // sector: SectorRoute,
+        history: HistoryRoute,
     });
 
     return <RNBottomNavigation navigationState={{ index, routes }} onIndexChange={setIndex} renderScene={renderScene} />;
