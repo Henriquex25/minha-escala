@@ -43,7 +43,7 @@ export default function App() {
                 <Stack.Screen name="EmployeeEdit" component={EmployeeEdit} options={{ title: "Editar" }} />
                 <Stack.Screen name="EmployeeDetails" component={EmployeeDetails} options={{ title: "Detalhes" }} />
                 <Stack.Screen name="DaysOffCreate" component={GenerateScaleDaysOffCreate} options={{ title: "Adicionar folga" }} />
-                <Stack.Screen name="MedicalCertificatesCreate" component={GenerateScaleMedicalCertificateCreate} options={{ title: "Atestados" }} />
+                <Stack.Screen name="MedicalCertificatesCreate" component={GenerateScaleMedicalCertificateCreate} options={{ title: "Atestado" }} />
                 <Stack.Screen name="VacationCreate" component={GenerateScaleVacationCreate} options={{ title: "Férias" }} />
             </Stack.Navigator>
         </NavigationContainer>

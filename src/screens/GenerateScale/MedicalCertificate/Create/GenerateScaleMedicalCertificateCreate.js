@@ -1,20 +1,19 @@
 import { useState, useEffect } from "react";
 import { View, Text, FlatList, TouchableOpacity } from "react-native";
-import { Button, Divider, Searchbar, Menu, PaperProvider } from "react-native-paper";
+import { Button, Divider, Searchbar, PaperProvider } from "react-native-paper";
 import { storage } from "../../../../Storage";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import moment from "moment";
-import Dialog from "../../../../components/Dialog";
+import Label from "../../../../components/Label";
+import DateTimeInput from "../../../../components/form/DateTimeInput";
 
 export default function GenerateScaleMedicalCertificateCreate({ navigation }) {
     const [searchQuery, setSearchQuery] = useState("");
     const [employees, setEmployees] = useState([]);
     const [employeesFound, setEmployeesFound] = useState([]);
     const [employeeSelectedToAddMedicalCertificate, setEmployeeSelectedToAddMedicalCertificate] = useState({});
-    const [showingDate, setShowingDate] = useState(false);
     const [medicalCertificatesSelected, setMedicalCertificatesSelected] = useState([]);
-    const [showingDeleteDialog, setShowingDeleteDialog] = useState(false);
-    const [medicalCertificateToBeRemoved, setMedicalCertificateToBeRemoved] = useState(null);
+    const [startDate, setStartDate] = useState(new Date());
+    const [endDate, setEndDate] = useState(new Date());
 
     function getGenerateScale() {
         const existingGenerateScales = storage.getString("generate-scales");
@@ -61,17 +60,18 @@ export default function GenerateScaleMedicalCertificateCreate({ navigation }) {
     }
 
     function saveMedicalCertificates() {
-        if (medicalCertificatesSelected.length === 0) {
-            navigation.goBack();
+        if (startDate.length === 0 || endDate.length === 0) {
+            // TODO: Mostrar mensagem de erro de validação
             return;
         }
 
         const generateScales = getGenerateScale();
         const indexMedicalCertificates = getIndexIfEmployeeAlreadyHasPreSelectedMedicalCertificate();
 
-        // Funcionário já possui dias de folga pre-selecionados
+        // Funcionário já possui atestado já inserido
         if (indexMedicalCertificates > -1) {
-            generateScales.medicalCertificates[indexMedicalCertificates].dates = [...medicalCertificatesSelected];
+            generateScales.medicalCertificates[indexMedicalCertificates].startDate = startDate;
+            generateScales.medicalCertificates[indexMedicalCertificates].endDate = endDate;
 
             storage.set("generate-scales", JSON.stringify(generateScales));
             navigation.goBack();
@@ -80,7 +80,8 @@ export default function GenerateScaleMedicalCertificateCreate({ navigation }) {
 
         const payload = {
             employee: employeeSelectedToAddMedicalCertificate,
-            dates: medicalCertificatesSelected.map((d) => moment(d).format("DD/MM/YYYY")),
+            startDate: moment(startDate).format("DD/MM/YYYY"),
+            endDate: moment(endDate).format("DD/MM/YYYY"),
         };
 
         if (generateScales.medicalCertificates?.length) {
@@ -92,14 +93,6 @@ export default function GenerateScaleMedicalCertificateCreate({ navigation }) {
         storage.set("generate-scales", JSON.stringify(generateScales));
 
         navigation.goBack();
-    }
-
-    function removeMedicalCertificate() {
-        if (!medicalCertificateToBeRemoved) return;
-
-        setMedicalCertificatesSelected(medicalCertificatesSelected.filter((d) => !moment(d).isSame(medicalCertificateToBeRemoved)));
-
-        setShowingDeleteDialog(false);
     }
 
     function fetchEmployees() {
@@ -166,52 +159,22 @@ export default function GenerateScaleMedicalCertificateCreate({ navigation }) {
 
                         <Divider className="my-6 bg-primary-500/40" />
 
-                        {/* Dias */}
+                        {/* Data inicial */}
                         <View>
-                            <TouchableOpacity className="w-full" activeOpacity={0.78} onPress={() => setShowingDate(true)}>
-                                <Text className="text-center text-primary-500 font-semibold mb-6">ESCOLHER DATA</Text>
-                            </TouchableOpacity>
+                            <Label label="Início" />
+                            <DateTimeInput value={startDate} onValueChange={(value) => setStartDate(value)} />
                         </View>
 
-                        {showingDate && <DateTimePicker value={new Date()} mode="date" onChange={setMedicalCertificate} />}
+                        {/* Data final */}
+                        <View className="mt-5">
+                            <Label label="Fim" />
+                            <DateTimeInput value={endDate} onValueChange={(value) => setEndDate(value)} />
+                        </View>
 
-                        {/* Lista de folgas escolhidas */}
-                        {medicalCertificatesSelected.length > 0 && (
-                            <View>
-                                <FlatList
-                                    data={medicalCertificatesSelected}
-                                    renderItem={({ item }) => (
-                                        <View>
-                                            <TouchableOpacity
-                                                className="bg-default-2 mb-2 py-2.5 rounded-lg"
-                                                onLongPress={() => {
-                                                    setMedicalCertificateToBeRemoved(item);
-                                                    setShowingDeleteDialog(true);
-                                                }}
-                                                activeOpacity={0.78}
-                                            >
-                                                <Text className="text-primary-400 font-semibold text-center">
-                                                    {moment(item).format("DD/MM/YYYY")}
-                                                </Text>
-                                            </TouchableOpacity>
-                                        </View>
-                                    )}
-                                />
-
-                                {/* Botão de salvar */}
-                                <Button className="mt-6 bg-primary-500" mode="elevated" onPress={saveMedicalCertificates} textColor="black">
-                                    Salvar
-                                </Button>
-
-                                {/* Dialog de confirmação de exclusão */}
-                                <Dialog
-                                    visible={showingDeleteDialog}
-                                    hideDialog={() => setShowingDeleteDialog(false)}
-                                    onConfirm={removeMedicalCertificate}
-                                    message="Tem certeza que deseja excluir esta folga?"
-                                />
-                            </View>
-                        )}
+                        {/* Botão de salvar */}
+                        <Button className="mt-7 bg-primary-500" mode="elevated" onPress={saveMedicalCertificates} textColor="black">
+                            Salvar
+                        </Button>
                     </View>
                 )}
             </View>

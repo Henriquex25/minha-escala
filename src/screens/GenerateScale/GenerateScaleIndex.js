@@ -36,7 +36,6 @@ export default function GenerateScaleIndex({ navigation }) {
 
     function generateScale() {
         setShowActivityIndicator(true);
-
         const scales = [];
         const scaleGenerationData = getScaleGenerationData();
         const dates = generateDates();
@@ -54,9 +53,17 @@ export default function GenerateScaleIndex({ navigation }) {
                     .filter((e) => !scaleGenerationData.daysOff.some((d) => d.employee.id === e.id && d.dates.some((dayOff) => dayOff === date)))
                     .filter(
                         (e) =>
-                            !scaleGenerationData.medicalCertificates.some(
-                                (mc) => mc.employee.id === e.id && mc.dates.some((dayOff) => dayOff === date)
-                            )
+                            !scaleGenerationData.medicalCertificates.some((mc) => {
+                                const dateOfTheScaleBeingGenerated = moment(date, "DD/MM/YYYY");
+                                const startDate = moment(mc.startDate, "DD/MM/YYYY");
+                                const endDate = moment(mc.endDate, "DD/MM/YYYY");
+
+                                return (
+                                    mc.employee.id === e.id &&
+                                    dateOfTheScaleBeingGenerated.isSameOrAfter(startDate) &&
+                                    dateOfTheScaleBeingGenerated.isSameOrBefore(endDate)
+                                );
+                            })
                     )
                     .filter(
                         (e) =>
@@ -73,9 +80,10 @@ export default function GenerateScaleIndex({ navigation }) {
                             })
                     );
 
+                console.log(availableEmployees);
+
                 const getSectorEmployees = scaleGenerationPopulationOrder[i];
 
-                console.log(availableEmployees);
                 scale = getSectorEmployees(scale, date, scaleGenerationData);
             }
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { View, Text, FlatList } from "react-native";
-import { Button, Divider, Searchbar, Menu, PaperProvider } from "react-native-paper";
+import { Button, Divider, Searchbar, PaperProvider } from "react-native-paper";
 import { storage } from "../../../../Storage";
 import DateTimeInput from "../../../../components/form/DateTimeInput";
 import Label from "../../../../components/Label";
@@ -13,8 +13,6 @@ export default function GenerateScaleVacationCreate({ navigation }) {
     const [employeeSelectedToAddVacation, setEmployeeSelectedToAddVacation] = useState({});
     const [startDate, setStartDate] = useState(new Date());
     const [endDate, setEndDate] = useState(new Date());
-    const [showingDeleteDialog, setShowingDeleteDialog] = useState(false);
-    const [vacationToBeRemovedCertificateToBeRemoved, setVacationToBeRemovedCertificateToBeRemoved] = useState(null);
 
     function getGenerateScale() {
         const existingGenerateScales = storage.getString("generate-scales");
@@ -43,12 +41,12 @@ export default function GenerateScaleVacationCreate({ navigation }) {
         }
 
         const generateScales = getGenerateScale();
-        const indexEmployeeToBeRemovedVacation = getIndexIfEmployeeAlreadyHasPreSelectedVacation();
+        const indexVacation = getIndexIfEmployeeAlreadyHasPreSelectedVacation();
 
         // Funcionário já possui dias de folga pre-selecionados
-        if (indexEmployeeToBeRemovedVacation > -1) {
-            generateScales.vacations[indexEmployeeToBeRemovedVacation].startDate = startDate;
-            generateScales.vacations[indexEmployeeToBeRemovedVacation].endDate = endDate;
+        if (indexVacation > -1) {
+            generateScales.vacations[indexVacation].startDate = startDate;
+            generateScales.vacations[indexVacation].endDate = endDate;
 
             storage.set("generate-scales", JSON.stringify(generateScales));
             navigation.goBack();
@@ -151,7 +149,7 @@ export default function GenerateScaleVacationCreate({ navigation }) {
                             </View>
                         </View>
 
-                        {/* Lista de fol{/* Botão de salvar */}
+                        {/* Botão de salvar */}
                         <Button className="mt-7 bg-primary-500" mode="elevated" onPress={saveVacationToGenerateScale} textColor="black">
                             Salvar
                         </Button>
