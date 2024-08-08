@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { TouchableOpacity, View, Text, Platform, ToastAndroid } from "react-native";
 import { Checkbox, TextInput } from "react-native-paper";
-import { storage } from "../../../Storage";
+import { storage, allSectors } from "../../../Storage";
 import Label from "../../../components/Label";
 
 export default function SectorCreateForm({ hideModal = () => {} }) {
@@ -9,14 +9,11 @@ export default function SectorCreateForm({ hideModal = () => {} }) {
     const [leadership, setLeadership] = useState(false);
     const [firstReference, setFirstReference] = useState(false);
     const [secondReference, setSecondReference] = useState(false);
-    const [receptionC, setReceptionC] = useState(false);
-    const [receptionG, setReceptionG] = useState(false);
-    const [medicalSupport, setMedicalSupport] = useState(false);
-    const [observation, setObservation] = useState(false);
-    const [fastCLM, setFastCLM] = useState(false);
-    const [fastCollect, setFastCollect] = useState(false);
-    const [fastMedication, setFastMedication] = useState(false);
-    const [concierge, setConcierge] = useState(false);
+    const [sectors, setSectors] = useState(
+        allSectors.map((s) => {
+            return { [s.id]: false };
+        })
+    );
 
     function saveEmployee() {
         const existingEmployees = storage.getString("employees");
@@ -30,15 +27,7 @@ export default function SectorCreateForm({ hideModal = () => {} }) {
             leadership: leadership,
             firstReference: firstReference,
             secondReference: secondReference,
-            sectors: {
-                receptionC: receptionC,
-                receptionG: receptionG,
-                medicalSupport: medicalSupport,
-                observation: observation,
-                fastCLM: fastCLM,
-                fastCollect: fastCollect,
-                concierge: concierge,
-            },
+            sectors: sectors,
         });
 
         storage.set("employees", JSON.stringify(employees));
@@ -53,7 +42,12 @@ export default function SectorCreateForm({ hideModal = () => {} }) {
     return (
         <>
             <Label label="Nome" />
-            <TextInput label="Nome" value={name} onChangeText={setName} style={{ backgroundColor: "#3a3a40", marginBottom: 20 }} />
+            <TextInput
+                label="Nome"
+                value={name}
+                onChangeText={setName}
+                style={{ backgroundColor: "#3a3a40", marginBottom: 20 }}
+            />
 
             {/* Liderança e referências */}
             <Label label="Liderança e referências" />
@@ -116,16 +110,19 @@ export default function SectorCreateForm({ hideModal = () => {} }) {
                 {/* Recepção bloco C */}
                 <View className="w-5/12 flex flex-row items-center">
                     <Checkbox
-                        status={receptionC ? "checked" : "unchecked"}
+                        status={sectors.receptionC ? "checked" : "unchecked"}
                         onPress={() => {
-                            setReceptionC(!receptionC);
+                            setSectors({ ...sectors, receptionC: !sectors.receptionC });
                         }}
                     />
                     <Label
                         label="Recep. C"
                         style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
                         onPress={() => {
-                            setReceptionC(!receptionC);
+                            setSectors({
+                                ...sectors,
+                                receptionC: !sectors.receptionC,
+                            });
                         }}
                     />
                 </View>
@@ -133,16 +130,22 @@ export default function SectorCreateForm({ hideModal = () => {} }) {
                 {/* Recepção bloco G */}
                 <View className="w-5/12 flex flex-row items-center">
                     <Checkbox
-                        status={receptionG ? "checked" : "unchecked"}
+                        status={sectors.receptionG ? "checked" : "unchecked"}
                         onPress={() => {
-                            setReceptionG(!receptionG);
+                            setSectors({
+                                ...sectors,
+                                receptionG: !sectors.receptionG,
+                            });
                         }}
                     />
                     <Label
                         label="Recep. G"
                         style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
                         onPress={() => {
-                            setReceptionG(!receptionG);
+                            setSectors({
+                                ...sectors,
+                                receptionG: !sectors.receptionG,
+                            });
                         }}
                     />
                 </View>
@@ -150,16 +153,22 @@ export default function SectorCreateForm({ hideModal = () => {} }) {
                 {/* Apoio */}
                 <View className="w-5/12 flex flex-row items-center">
                     <Checkbox
-                        status={medicalSupport ? "checked" : "unchecked"}
+                        status={sectors.medicalSupport ? "checked" : "unchecked"}
                         onPress={() => {
-                            setMedicalSupport(!medicalSupport);
+                            setSectors({
+                                ...sectors,
+                                medicalSupport: !sectors.medicalSupport,
+                            });
                         }}
                     />
                     <Label
                         label="Apoio"
                         style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
                         onPress={() => {
-                            setMedicalSupport(!medicalSupport);
+                            setSectors({
+                                ...sectors,
+                                medicalSupport: !sectors.medicalSupport,
+                            });
                         }}
                     />
                 </View>
@@ -167,16 +176,22 @@ export default function SectorCreateForm({ hideModal = () => {} }) {
                 {/* Observação */}
                 <View className="w-5/12 flex flex-row items-center">
                     <Checkbox
-                        status={observation ? "checked" : "unchecked"}
+                        status={sectors.observation ? "checked" : "unchecked"}
                         onPress={() => {
-                            setObservation(!observation);
+                            setSectors({
+                                ...sectors,
+                                observation: !sectors.observation,
+                            });
                         }}
                     />
                     <Label
                         label="Observação"
                         style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
                         onPress={() => {
-                            setObservation(!observation);
+                            setSectors({
+                                ...sectors,
+                                observation: !sectors.observation,
+                            });
                         }}
                     />
                 </View>
@@ -184,16 +199,22 @@ export default function SectorCreateForm({ hideModal = () => {} }) {
                 {/* Fast Clínica */}
                 <View className="w-5/12 flex flex-row items-center">
                     <Checkbox
-                        status={fastCLM ? "checked" : "unchecked"}
+                        status={sectors.fastCLM ? "checked" : "unchecked"}
                         onPress={() => {
-                            setFastCLM(!fastCLM);
+                            setSectors({
+                                ...sectors,
+                                fastCLM: !sectors.fastCLM,
+                            });
                         }}
                     />
                     <Label
                         label="Fast CLM"
                         style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
                         onPress={() => {
-                            setFastCLM(!fastCLM);
+                            setSectors({
+                                ...sectors,
+                                fastCLM: !sectors.fastCLM,
+                            });
                         }}
                     />
                 </View>
@@ -201,16 +222,22 @@ export default function SectorCreateForm({ hideModal = () => {} }) {
                 {/* Fast Coleta */}
                 <View className="w-5/12 flex flex-row items-center">
                     <Checkbox
-                        status={fastCollect ? "checked" : "unchecked"}
+                        status={sectors.fastCollect ? "checked" : "unchecked"}
                         onPress={() => {
-                            setFastCollect(!fastCollect);
+                            setSectors({
+                                ...sectors,
+                                fastCollect: !sectors.fastCollect,
+                            });
                         }}
                     />
                     <Label
                         label="Fast Coleta"
                         style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
                         onPress={() => {
-                            setFastCollect(!fastCollect);
+                            setSectors({
+                                ...sectors,
+                                fastCollect: !sectors.fastCollect,
+                            });
                         }}
                     />
                 </View>
@@ -218,16 +245,22 @@ export default function SectorCreateForm({ hideModal = () => {} }) {
                 {/* Fast Medicação */}
                 <View className="w-5/12 flex flex-row items-center">
                     <Checkbox
-                        status={fastMedication ? "checked" : "unchecked"}
+                        status={sectors.fastMedication ? "checked" : "unchecked"}
                         onPress={() => {
-                            setFastMedication(!fastMedication);
+                            setSectors({
+                                ...sectors,
+                                fastMedication: !sectors.fastMedication,
+                            });
                         }}
                     />
                     <Label
-                        label="Fast Medicação"
+                        label="Fast Med."
                         style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
                         onPress={() => {
-                            setFastMedication(!fastMedication);
+                            setSectors({
+                                ...sectors,
+                                fastMedication: !sectors.fastMedication,
+                            });
                         }}
                     />
                 </View>
@@ -235,16 +268,22 @@ export default function SectorCreateForm({ hideModal = () => {} }) {
                 {/* Concierge */}
                 <View className="w-5/12 flex flex-row items-center">
                     <Checkbox
-                        status={concierge ? "checked" : "unchecked"}
+                        status={sectors.concierge ? "checked" : "unchecked"}
                         onPress={() => {
-                            setConcierge(!concierge);
+                            setSectors({
+                                ...sectors,
+                                concierge: !sectors.concierge,
+                            });
                         }}
                     />
                     <Label
                         label="Concierge"
                         style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
                         onPress={() => {
-                            setConcierge(!concierge);
+                            setSectors({
+                                ...sectors,
+                                concierge: !sectors.concierge,
+                            });
                         }}
                     />
                 </View>

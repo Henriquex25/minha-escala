@@ -62,7 +62,7 @@ export default function EmployeeList({ navigation }) {
     useEffect(() => fetchEmployees(), []);
 
     return (
-        <View className="mt-2">
+        <View className="mt-2 mb-14">
             {employees.length > 0 ? (
                 <FlatList
                     data={employees}
@@ -78,7 +78,14 @@ export default function EmployeeList({ navigation }) {
                             <Menu
                                 visible={visibleMenus[item.id]}
                                 onDismiss={() => closeMenu(item.id)}
-                                anchor={<IconButton icon="dots-vertical" iconColor="#0ea5e9" size={20} onPress={() => openMenu(item.id)} />}
+                                anchor={
+                                    <IconButton
+                                        icon="dots-vertical"
+                                        iconColor="#0ea5e9"
+                                        size={20}
+                                        onPress={() => openMenu(item.id)}
+                                    />
+                                }
                             >
                                 {/* Editar */}
                                 <Menu.Item
@@ -119,7 +126,11 @@ export default function EmployeeList({ navigation }) {
                 <Text className="text-gray-400 text-center">Nenhum funcionário cadastrado</Text>
             )}
 
-            <Dialog visible={showingDeleteDialog} hideDialog={hideDialog} onConfirm={deleteEmployee} />
+            <Dialog
+                visible={showingDeleteDialog}
+                hideDialog={hideDialog}
+                onConfirm={deleteEmployee}
+            />
         </View>
     );
 }

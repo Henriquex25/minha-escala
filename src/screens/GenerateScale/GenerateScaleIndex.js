@@ -1,8 +1,8 @@
-import { ScrollView, StatusBar, View } from "react-native";
+import { ScrollView, StatusBar, View, Platform } from "react-native";
 import Body from "../../components/layout/Body";
 import DateTimeInput from "../../components/form/DateTimeInput";
 import { SegmentedButtons, Button } from "react-native-paper";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Title from "../../components/layout/Title";
 import Label from "../../components/Label";
 import GenerateScaleDaysOffList from "./DaysOff/GenerateScaleDaysOffList";
@@ -34,8 +34,22 @@ export default function GenerateScaleIndex({ navigation }) {
         getReceptionGEmployees,
     ];
 
-    function generateScale() {
+    function handleGenerateScale() {
+        setShowScaleGenerationDialog(false);
         setShowActivityIndicator(true);
+
+        setTimeout(() => {
+            generateScale();
+
+            setShowActivityIndicator(false);
+
+            if (Platform.OS === "android") {
+                ToastAndroid.show("Escala gerada com sucesso ✓", ToastAndroid.SHORT);
+            }
+        }, 0);
+    }
+
+    function generateScale() {
         const scales = [];
         const scaleGenerationData = getScaleGenerationData();
         const dates = generateDates();
@@ -47,57 +61,83 @@ export default function GenerateScaleIndex({ navigation }) {
 
         dates.forEach((date) => {
             let scale = { date: date };
+            let histories = getHistories();
+
+            scale.availableEmployees = JSON.parse(storage.getString("employees") ?? [])
+                .filter(
+                    (e) =>
+                        !scaleGenerationData.daysOff.some(
+                            (d) =>
+                                d.employee.id === e.id && d.dates.some((dayOff) => dayOff === date)
+                        )
+                )
+                .filter(
+                    (e) =>
+                        !scaleGenerationData.medicalCertificates.some((mc) => {
+                            const dateOfTheScaleBeingGenerated = moment(date, "DD/MM/YYYY");
+                            const startDate = moment(mc.startDate, "DD/MM/YYYY");
+                            const endDate = moment(mc.endDate, "DD/MM/YYYY");
+
+                            return (
+                                mc.employee.id === e.id &&
+                                dateOfTheScaleBeingGenerated.isSameOrAfter(startDate) &&
+                                dateOfTheScaleBeingGenerated.isSameOrBefore(endDate)
+                            );
+                        })
+                )
+                .filter(
+                    (e) =>
+                        !scaleGenerationData.vacations.some((v) => {
+                            const dateOfTheScaleBeingGenerated = moment(date, "DD/MM/YYYY");
+                            const startDate = moment(v.startDate, "DD/MM/YYYY");
+                            const endDate = moment(v.endDate, "DD/MM/YYYY");
+
+                            return (
+                                v.employee.id === e.id &&
+                                dateOfTheScaleBeingGenerated.isSameOrAfter(startDate) &&
+                                dateOfTheScaleBeingGenerated.isSameOrBefore(endDate)
+                            );
+                        })
+                );
 
             for (let i = 0; i < scaleGenerationPopulationOrder.length; i++) {
-                const availableEmployees = JSON.parse(storage.getString("employees") ?? [])
-                    .filter((e) => !scaleGenerationData.daysOff.some((d) => d.employee.id === e.id && d.dates.some((dayOff) => dayOff === date)))
-                    .filter(
-                        (e) =>
-                            !scaleGenerationData.medicalCertificates.some((mc) => {
-                                const dateOfTheScaleBeingGenerated = moment(date, "DD/MM/YYYY");
-                                const startDate = moment(mc.startDate, "DD/MM/YYYY");
-                                const endDate = moment(mc.endDate, "DD/MM/YYYY");
-
-                                return (
-                                    mc.employee.id === e.id &&
-                                    dateOfTheScaleBeingGenerated.isSameOrAfter(startDate) &&
-                                    dateOfTheScaleBeingGenerated.isSameOrBefore(endDate)
-                                );
-                            })
-                    )
-                    .filter(
-                        (e) =>
-                            !scaleGenerationData.vacations.some((v) => {
-                                const dateOfTheScaleBeingGenerated = moment(date, "DD/MM/YYYY");
-                                const startDate = moment(v.startDate, "DD/MM/YYYY");
-                                const endDate = moment(v.endDate, "DD/MM/YYYY");
-
-                                return (
-                                    v.employee.id === e.id &&
-                                    dateOfTheScaleBeingGenerated.isSameOrAfter(startDate) &&
-                                    dateOfTheScaleBeingGenerated.isSameOrBefore(endDate)
-                                );
-                            })
-                    );
-
-                console.log(availableEmployees);
-
                 const getSectorEmployees = scaleGenerationPopulationOrder[i];
+                const [sca, his] = getSectorEmployees(scale, date, histories);
 
-                scale = getSectorEmployees(scale, date, scaleGenerationData);
+                scale = sca;
+                histories = his;
             }
 
             scales.push(scale);
+            storage.set("histories", JSON.stringify(histories));
         });
 
-        setShowActivityIndicator(false);
-        setShowScaleGenerationDialog(false);
+        saveScalesDB(scales);
     }
 
     function getScaleGenerationData() {
         const generateScales = storage.getString("generate-scales");
 
         return generateScales ? JSON.parse(generateScales) : {};
+    }
+
+    function getScales() {
+        const scales = storage.getString("scales");
+
+        return scales ? JSON.parse(scales) : [];
+    }
+
+    function saveScalesDB(scales) {
+        let scalesDB = getScales();
+
+        scalesDB = [...scalesDB, ...scales];
+        storage.set("scales", JSON.stringify(scalesDB));
+    }
+
+    function getHistories() {
+        const histories = storage.getString("histories");
+
+        return histories ? JSON.parse(histories) : [];
     }
 
     function generateDates() {
@@ -115,38 +155,335 @@ export default function GenerateScaleIndex({ navigation }) {
         return dates;
     }
 
-    function getObservationEmployees(scale, date, availableEmployees) {
-        return scale;
+    function getObservationEmployees(scale, date, histories) {
+        const sectorId = "observation";
+        const sectorName = "Observação";
+        const maxNumberEmployeesForTheSector = 1;
+        const [selectedEmployees, his] = chooseEmployee(
+            sectorId,
+            sectorName,
+            maxNumberEmployeesForTheSector,
+            scale,
+            histories,
+            date
+        );
+
+        scale[sectorId] = selectedEmployees;
+
+        scale.availableEmployees = scale.availableEmployees.filter(
+            (employee) => !selectedEmployees.some((e) => e.id === employee.id)
+        );
+
+        return [scale, his];
     }
 
-    function getFastCLMEmployees(scale) {
-        scale.fastCLM = { name: "Ciclano" };
+    function getFastCLMEmployees(scale, date, histories) {
+        const sectorId = "fastCLM";
+        const sectorName = "Fast CLM";
+        const maxNumberEmployeesForTheSector = 1;
+        const [selectedEmployees, his] = chooseEmployee(
+            sectorId,
+            sectorName,
+            maxNumberEmployeesForTheSector,
+            scale,
+            histories,
+            date
+        );
 
-        return scale;
+        scale[sectorId] = selectedEmployees;
+
+        scale.availableEmployees = scale.availableEmployees.filter(
+            (employee) => !selectedEmployees.some((e) => e.id === employee.id)
+        );
+
+        return [scale, his];
     }
 
-    function getFastMedicationEmployees(scale) {
-        return scale;
+    function getFastMedicationEmployees(scale, date, histories) {
+        const sectorId = "fastMedication";
+        const sectorName = "Fast medicação";
+        const maxNumberEmployeesForTheSector = 1;
+        const [selectedEmployees, his] = chooseEmployee(
+            sectorId,
+            sectorName,
+            maxNumberEmployeesForTheSector,
+            scale,
+            histories,
+            date
+        );
+
+        scale[sectorId] = selectedEmployees;
+
+        scale.availableEmployees = scale.availableEmployees.filter(
+            (employee) => !selectedEmployees.some((e) => e.id === employee.id)
+        );
+
+        return [scale, his];
     }
 
-    function getFastCollectEmployees(scale) {
-        return scale;
+    function getFastCollectEmployees(scale, date, histories) {
+        const sectorId = "fastCollect";
+        const sectorName = "Fast coleta";
+        const maxNumberEmployeesForTheSector = 1;
+        const [selectedEmployees, his] = chooseEmployee(
+            sectorId,
+            sectorName,
+            maxNumberEmployeesForTheSector,
+            scale,
+            histories,
+            date
+        );
+
+        scale[sectorId] = selectedEmployees;
+
+        scale.availableEmployees = scale.availableEmployees.filter(
+            (employee) => !selectedEmployees.some((e) => e.id === employee.id)
+        );
+
+        return [scale, his];
     }
 
-    function getConciergeEmployees(scale) {
-        return scale;
+    function getConciergeEmployees(scale, date, histories) {
+        const sectorId = "concierge";
+        const sectorName = "Concierge";
+        const maxNumberEmployeesForTheSector = 1;
+        let selectedEmployees = [];
+        let hist = histories;
+        const preferredEmployeeForSector = scale.availableEmployees.find(
+            (e) => e.name === "Thatianny"
+        );
+
+        if (preferredEmployeeForSector) {
+            const sectorHistoryIndex = histories.findIndex((h) => h.id === sectorId);
+            const sectorHistory =
+                sectorHistoryIndex > -1
+                    ? histories[sectorHistoryIndex]
+                    : {
+                          id: sectorId,
+                          name: sectorName,
+                          employees: [],
+                      };
+
+            selectedEmployees = [
+                {
+                    id: preferredEmployeeForSector.id,
+                    name: preferredEmployeeForSector.name,
+                    lastDate: date,
+                },
+            ];
+
+            hist = updatePartialHistory(
+                histories,
+                sectorHistoryIndex,
+                sectorHistory,
+                preferredEmployeeForSector,
+                date
+            );
+        } else {
+            const [selEmployees, his] = chooseEmployee(
+                sectorId,
+                sectorName,
+                maxNumberEmployeesForTheSector,
+                scale,
+                histories,
+                date
+            );
+
+            selectedEmployees = selEmployees;
+            hist = his;
+        }
+
+        scale[sectorId] = selectedEmployees;
+
+        scale.availableEmployees = scale.availableEmployees.filter(
+            (employee) => !selectedEmployees.some((e) => e.id === employee.id)
+        );
+
+        return [scale, hist];
     }
 
-    function getMedicalSupportEmployees(scale) {
-        return scale;
+    function getMedicalSupportEmployees(scale, date, histories) {
+        const sectorId = "medicalSupport";
+        const sectorName = "Apoio médico";
+        const maxNumberEmployeesForTheSector = 2;
+        const [selectedEmployees, his] = chooseEmployee(
+            sectorId,
+            sectorName,
+            maxNumberEmployeesForTheSector,
+            scale,
+            histories,
+            date
+        );
+
+        scale[sectorId] = selectedEmployees;
+
+        scale.availableEmployees = scale.availableEmployees.filter(
+            (employee) => !selectedEmployees.some((e) => e.id === employee.id)
+        );
+
+        return [scale, his];
     }
 
-    function getReceptionCEmployees(scale) {
-        return scale;
+    function getReceptionCEmployees(scale, date, histories) {
+        const sectorId = "receptionC";
+        const sectorName = "Recepção bloco C";
+        const maxNumberEmployeesForTheSector = 1;
+        const [selectedEmployees, his] = chooseEmployee(
+            sectorId,
+            sectorName,
+            maxNumberEmployeesForTheSector,
+            scale,
+            histories,
+            date
+        );
+
+        scale[sectorId] = selectedEmployees;
+
+        scale.availableEmployees = scale.availableEmployees.filter(
+            (employee) => !selectedEmployees.some((e) => e.id === employee.id)
+        );
+
+        return [scale, his];
     }
 
-    function getReceptionGEmployees(scale) {
-        return scale;
+    function getReceptionGEmployees(scale, date, histories) {
+        const sectorId = "receptionG";
+        const sectorName = "Recepção bloco G";
+        const maxNumberEmployeesForTheSector = 0;
+        const [selectedEmployees, his] = chooseEmployee(
+            sectorId,
+            sectorName,
+            maxNumberEmployeesForTheSector,
+            scale,
+            histories,
+            date
+        );
+
+        scale[sectorId] = selectedEmployees;
+
+        scale.availableEmployees = scale.availableEmployees.filter(
+            (employee) => !selectedEmployees.some((e) => e.id === employee.id)
+        );
+
+        return [scale, his];
+    }
+
+    function chooseEmployee(
+        sectorId,
+        sectorName,
+        maxNumberEmployeesForTheSector,
+        scale,
+        histories,
+        date
+    ) {
+        let updatedHistories = histories;
+        const selectedEmployees = [];
+        const sectorHistoryIndex = updatedHistories.findIndex((h) => h.id === sectorId);
+        const sectorHistory =
+            sectorHistoryIndex > -1
+                ? updatedHistories[sectorHistoryIndex]
+                : {
+                      id: sectorId,
+                      name: sectorName,
+                      employees: [],
+                  };
+
+        // Busca os funcionários habilitados para o setor
+        let employeesAvailableForTheSector = scale.availableEmployees.filter(
+            (employee) => employee.sectors[sectorId] === true
+        );
+
+        // Caso não tenha nenhum funcionário habilitado, retorna um array vazio
+        if (employeesAvailableForTheSector.length === 0) {
+            return [selectedEmployees, histories];
+        }
+
+        // Se o número máximo de funcionários por setor for igual a 0, significa que não tem limite de funcionários por setor
+        // logo todos os funcionários disponíveis serão selecionados
+        if (maxNumberEmployeesForTheSector === 0) {
+            maxNumberEmployeesForTheSector = employeesAvailableForTheSector.length;
+        }
+
+        // Coloca no histórico todos os funcionários que estão aptos para o setor, mas não tem histórico anterior
+        // fora do histórico, nunca serão selecionados, pois a escolhe é para o funcionário que tem o maior tempo
+        // desde a última vez que ficou no setor
+        employeesAvailableForTheSector.forEach((employee) => {
+            if (!sectorHistory.employees.some((e) => e.id === employee.id)) {
+                sectorHistory.employees.push({
+                    id: employee.id,
+                    name: employee.name,
+                    lastDate: null,
+                });
+            }
+        });
+
+        // Remove os funcionários que estão no histórico do setor, porém foram desabilitados para continuar no setor
+        sectorHistory.employees = sectorHistory.employees.filter((employee) => {
+            const emp = JSON.parse(storage.getString("employees") ?? []).find(
+                (e) => e.id === employee.id
+            );
+
+            return emp.sectors[sectorId] === true;
+        });
+
+        for (let i = 0; i < maxNumberEmployeesForTheSector; i++) {
+            // Busca o primeiro funcionário do histórico que esteja na lista de funcionários disponíveis
+            let employeeLastSeenInTheFurthestSector = sectorHistory.employees.find((e) =>
+                employeesAvailableForTheSector.some(
+                    (e2) => e2.id === e.id && !selectedEmployees.some((e3) => e3.id === e2.id)
+                )
+            );
+
+            // Caso não encontre nenhum usuário disponível no histórico, o primeiro usuário disponíveis será selecionado
+            // e retirado da lista lista de funcionários disponíveis para que não seja selecionado novamente no próximo loop
+            if (!employeeLastSeenInTheFurthestSector) {
+                employeeLastSeenInTheFurthestSector = employeesAvailableForTheSector[0];
+
+                employeesAvailableForTheSector = employeesAvailableForTheSector.filter(
+                    (employee) => employee.id !== employeeLastSeenInTheFurthestSector.id
+                );
+            }
+
+            selectedEmployees.push(employeeLastSeenInTheFurthestSector);
+
+            employeesAvailableForTheSector = employeesAvailableForTheSector.filter(
+                (employee) => employee.id !== employeeLastSeenInTheFurthestSector.id
+            );
+
+            updatedHistories = updatePartialHistory(
+                histories,
+                sectorHistoryIndex,
+                sectorHistory,
+                employeeLastSeenInTheFurthestSector,
+                date
+            );
+        }
+
+        return [selectedEmployees, updatedHistories];
+    }
+
+    function updatePartialHistory(
+        histories,
+        sectorHistoryIndex,
+        sectorHistory,
+        selectedEmployee,
+        date
+    ) {
+        // Remove o funcionário da lista do histórico
+        sectorHistory.employees = sectorHistory.employees.filter(
+            (employee) => employee.id !== selectedEmployee.id
+        );
+
+        // Adiciona funcionário escolhido no fim (por último) do histórico
+        sectorHistory.employees.push({
+            id: selectedEmployee.id,
+            name: selectedEmployee.name,
+            lastDate: date,
+        });
+
+        histories[sectorHistoryIndex] = sectorHistory;
+
+        return histories;
     }
 
     return (
@@ -192,21 +529,33 @@ export default function GenerateScaleIndex({ navigation }) {
 
                 {/* Folgas */}
                 <View className="mt-5">
-                    <Button icon="calendar-month-outline" mode="elevated" onPress={() => setShowingDaysOffModal(true)}>
+                    <Button
+                        icon="calendar-month-outline"
+                        mode="elevated"
+                        onPress={() => setShowingDaysOffModal(true)}
+                    >
                         Folgas
                     </Button>
                 </View>
 
                 {/* Atestados */}
                 <View className="mt-5">
-                    <Button icon="hospital-box-outline" mode="elevated" onPress={() => setShowingMedicalCertificateModal(true)}>
+                    <Button
+                        icon="hospital-box-outline"
+                        mode="elevated"
+                        onPress={() => setShowingMedicalCertificateModal(true)}
+                    >
                         Atestados
                     </Button>
                 </View>
 
                 {/* Férias */}
                 <View className="mt-5">
-                    <Button icon="hospital-box-outline" mode="elevated" onPress={() => setShowingVacationModal(true)}>
+                    <Button
+                        icon="hospital-box-outline"
+                        mode="elevated"
+                        onPress={() => setShowingVacationModal(true)}
+                    >
                         Férias
                     </Button>
                 </View>
@@ -214,21 +563,39 @@ export default function GenerateScaleIndex({ navigation }) {
 
             {/* Botão de gerar */}
             <View className="mt-5 mb-2.5">
-                <Button icon="refresh" mode="contained" onPress={() => setShowScaleGenerationDialog(true)}>
+                <Button
+                    icon="refresh"
+                    mode="contained"
+                    onPress={() => setShowScaleGenerationDialog(true)}
+                >
                     Gerar escalas
                 </Button>
             </View>
 
             {/* Modais */}
-            <GenerateScaleDaysOffList visible={showingDaysOffModal} hideModal={() => setShowingDaysOffModal(false)} navigation={navigation} />
+            <GenerateScaleDaysOffList
+                visible={showingDaysOffModal}
+                hideModal={() => setShowingDaysOffModal(false)}
+                navigation={navigation}
+            />
+
             <GenerateScaleMedicalCertificateList
                 visible={showingMedicalCertificateModal}
                 hideModal={() => setShowingMedicalCertificateModal(false)}
                 navigation={navigation}
             />
-            <GenerateScaleVacationList visible={showingVacationModal} hideModal={() => setShowingVacationModal(false)} navigation={navigation} />
 
-            <Dialog visible={showScaleGenerationDialog} hideDialog={() => setShowScaleGenerationDialog(false)} onConfirm={generateScale} />
+            <GenerateScaleVacationList
+                visible={showingVacationModal}
+                hideModal={() => setShowingVacationModal(false)}
+                navigation={navigation}
+            />
+
+            <Dialog
+                visible={showScaleGenerationDialog}
+                hideDialog={() => setShowScaleGenerationDialog(false)}
+                onConfirm={handleGenerateScale}
+            />
         </Body>
     );
 }

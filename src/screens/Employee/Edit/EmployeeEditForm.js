@@ -34,6 +34,7 @@ export default function EmployeeEditForm({ employee, navigation, hideModal = () 
                 observation: observation,
                 fastCLM: fastCLM,
                 fastCollect: fastCollect,
+                fastMedication: fastMedication,
                 concierge: concierge,
             },
         };
@@ -52,7 +53,12 @@ export default function EmployeeEditForm({ employee, navigation, hideModal = () 
     return (
         <>
             <Label label="Nome" />
-            <TextInput label="Nome" value={name} onChangeText={setName} style={{ backgroundColor: "#3a3a40", marginBottom: 20, color: "#e5e7eb" }} />
+            <TextInput
+                label="Nome"
+                value={name}
+                onChangeText={setName}
+                style={{ backgroundColor: "#3a3a40", marginBottom: 20, color: "#e5e7eb" }}
+            />
 
             {/* Liderança e referências */}
             <Label label="Liderança e referências" />
@@ -223,7 +229,7 @@ export default function EmployeeEditForm({ employee, navigation, hideModal = () 
                         }}
                     />
                     <Label
-                        label="Fast Medicação"
+                        label="Fast Med."
                         style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
                         onPress={() => {
                             setFastMedication(!fastMedication);

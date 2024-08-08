@@ -1,18 +1,15 @@
 import { FlatList, Text, View, StyleSheet } from "react-native";
 import { Divider } from "react-native-paper";
+import { allSectors } from "../../../Storage";
 
 export default function EmployeeDetail({ route, navigation }) {
     const employee = route.params;
     const activeSectors = getActiveSectors();
-    const sectors = {
-        receptionC: "Recep. C",
-        receptionG: "Recep. G",
-        medicalSupport: "Apoio",
-        observation: "Observação",
-        fastCLM: "Fast CLM",
-        fastCollect: "Fast coleta",
-        concierge: "Concierge",
-    };
+    const sectors = {};
+
+    allSectors.forEach((sector) => {
+        sectors[sector.id] = sector.name;
+    });
 
     function getActiveSectors() {
         const sectors = Object.keys(employee.sectors);
@@ -21,7 +18,9 @@ export default function EmployeeDetail({ route, navigation }) {
 
     return (
         <View className="px-6 pt-4 gap-y-2">
-            <Text className="text-xl text-primary-400 font-semibold pb-2 text-center">{employee.name}</Text>
+            <Text className="text-xl text-primary-400 font-semibold pb-2 text-center">
+                {employee.name}
+            </Text>
             <Divider className="my-2 bg-primary-500/40" />
             <View className="flex flex-row">
                 <View className="w-[35.5%]">
@@ -65,7 +64,9 @@ export default function EmployeeDetail({ route, navigation }) {
                     />
                 )}
 
-                {activeSectors.length === 0 && <Text className="text-gray-500">Nenhum setor atribuído</Text>}
+                {activeSectors.length === 0 && (
+                    <Text className="text-gray-500">Nenhum setor atribuído</Text>
+                )}
             </View>
         </View>
     );

@@ -1,72 +1,38 @@
 import Body from "../../components/layout/Body";
 import Title from "../../components/layout/Title";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import HistorySector from "./components/HistorySector";
 import { useMMKVObject } from "react-native-mmkv";
 import { View, TouchableOpacity, Text, FlatList } from "react-native";
-import { IconButton } from "react-native-paper";
-import DraggableFlatList, { ScaleDecorator, ShadowDecorator, OpacityDecorator, useOnCellActiveAnimation } from "react-native-draggable-flatlist";
+import DraggableFlatList, {
+    ScaleDecorator,
+    ShadowDecorator,
+    OpacityDecorator,
+} from "react-native-draggable-flatlist";
 import Animated from "react-native-reanimated";
 import Label from "../../components/Label";
-import { useEffect, useState } from "react";
-import { sectors, storage } from "../../Storage";
-import { Menu, Icon, Portal, Modal } from "react-native-paper";
-import { globalStyle } from "../../globalStyle";
+import { useState } from "react";
+import { allSectors } from "../../Storage";
+import { Icon, Portal, Modal } from "react-native-paper";
 import Button from "../../components/Button";
 
 export default function HistoryIndex({ navigation }) {
     const [histories, setHistories] = useMMKVObject("histories");
-    const [visibleModalTransferSectorEmployee, setVisibleModalTransferSectorEmployee] = useState(false);
-    const [sectorsAvailableToChange, setSectorsAvailableToChange] = useState(sectors);
+    const [visibleModalTransferSectorEmployee, setVisibleModalTransferSectorEmployee] =
+        useState(false);
+    const [sectorsAvailableToChange, setSectorsAvailableToChange] = useState(allSectors);
     const [payloadToChangeSectorEmployee, setPayloadToChangeSectorEmployee] = useState({});
-
-    // useEffect(() => {
-    //     storage.set(
-    //         "histories",
-    //         JSON.stringify([
-    //             {
-    //                 id: "observation",
-    //                 name: "Observações",
-    //                 employees: [
-    //                     {
-    //                         id: 1,
-    //                         name: "Kaique",
-    //                         lastDate: "01/08/2024",
-    //                     },
-    //                     {
-    //                         id: 2,
-    //                         name: "Marcus",
-    //                         lastDate: "30/07/2024",
-    //                     },
-    //                 ],
-    //             },
-    //             {
-    //                 id: "receptionC",
-    //                 name: "Recepção C",
-    //                 employees: [
-    //                     {
-    //                         id: 3,
-    //                         name: "Taiane",
-    //                         lastDate: "01/08/2024",
-    //                     },
-    //                     {
-    //                         id: 4,
-    //                         name: "Juliana",
-    //                         lastDate: "30/07/2024",
-    //                     },
-    //                 ],
-    //             },
-    //         ])
-    //     );
-    // }, []);
 
     function changeSectorEmployee(toSectorID) {
         const his = histories;
         const fromSectorIndex = payloadToChangeSectorEmployee.fromSectorIndex;
         const toSectorIndex = histories.findIndex((s) => s.id == toSectorID);
-        const employee = his[fromSectorIndex].employees.find((e) => e.id === payloadToChangeSectorEmployee.employeeId);
+        const employee = his[fromSectorIndex].employees.find(
+            (e) => e.id === payloadToChangeSectorEmployee.employeeId
+        );
 
-        his[fromSectorIndex].employees = his[fromSectorIndex].employees.filter((e) => e.id !== payloadToChangeSectorEmployee.employeeId);
+        his[fromSectorIndex].employees = his[fromSectorIndex].employees.filter(
+            (e) => e.id !== payloadToChangeSectorEmployee.employeeId
+        );
 
         his[toSectorIndex].employees = [...his[toSectorIndex].employees, employee];
 
@@ -84,13 +50,20 @@ export default function HistoryIndex({ navigation }) {
                             onLongPress={drag}
                             disabled={isActive}
                             className="flex flex-row items-center px-5 py-3 space-x-3 border-b rounded-lg border-gray-400/10 w-full mt-2"
-                            style={[{ backgroundColor: isActive ? "#3a3a40" : "#313136", elevation: isActive ? 3 : 0 }]}
+                            style={[
+                                {
+                                    backgroundColor: isActive ? "#3a3a40" : "#313136",
+                                    elevation: isActive ? 3 : 0,
+                                },
+                            ]}
                             activeOpacity={1}
                         >
                             <Animated.View className="flex flex-row space-x-2 justify-between w-full">
                                 <View className="flex flex-row space-x-2">
                                     <Text className="text-gray-200">{item.name}</Text>
-                                    <Text className="text-gray-400">{item.lastDate}</Text>
+                                    <Text className="text-gray-400">
+                                        {item.lastDate ? item.lastDate : ""}
+                                    </Text>
                                 </View>
 
                                 <TouchableOpacity
@@ -100,7 +73,11 @@ export default function HistoryIndex({ navigation }) {
                                             employeeId: item.id,
                                             fromSectorIndex: sectorIndex,
                                         });
-                                        setSectorsAvailableToChange(sectors.filter((s) => s.id !== histories[sectorIndex].id));
+                                        setSectorsAvailableToChange(
+                                            sectors.filter(
+                                                (s) => s.id !== histories[sectorIndex].id
+                                            )
+                                        );
                                         setVisibleModalTransferSectorEmployee(true);
                                     }}
                                 >
@@ -114,26 +91,33 @@ export default function HistoryIndex({ navigation }) {
         );
     };
 
-    const renderSector = ({ item, drag, isActive, getIndex }) => {
-        const sectorIndex = getIndex();
+    const renderSector = ({ item }) => {
+        const sectorIndex = histories.findIndex((s) => s.id === item.id);
+        const employees = sectorIndex > -1 ? histories[sectorIndex]?.employees : [];
 
         return (
             <View className="mt-3 border border-gray-500/50 p-2 rounded-lg relative">
-                <Label label={item.name} className="text-primary-400 font-semibold" style={{ fontSize: 16 }} />
+                <Label
+                    label={item.name}
+                    className="text-primary-400 font-semibold"
+                    style={{ fontSize: 16 }}
+                />
 
                 {/* <TouchableOpacity className="absolute -top-2 right-0 p-2" activeOpacity={0.78}>
                     <IconButton icon="plus" size={20} iconColor="#0ea5e9" onPress={() => ""} />
                 </TouchableOpacity> */}
 
                 <DraggableFlatList
-                    data={item.employees}
-                    renderItem={({ item, drag, isActive, getIndex }) => renderEmployee({ item, drag, isActive, sectorIndex: sectorIndex })}
-                    keyExtractor={(item) => item.name}
+                    data={employees}
+                    renderItem={({ item, drag, isActive }) =>
+                        renderEmployee({ item, drag, isActive, sectorIndex: sectorIndex })
+                    }
+                    keyExtractor={(item) => item.id}
                     onDragEnd={({ data }) =>
                         setHistories((prevData) => {
                             const prevHistory = prevData;
 
-                            prevHistory[getIndex()].employees = data;
+                            prevHistory[sectorIndex].employees = data;
 
                             return prevHistory;
                         })
@@ -148,14 +132,23 @@ export default function HistoryIndex({ navigation }) {
             <GestureHandlerRootView>
                 <Title title="Histórico" />
 
-                <DraggableFlatList data={histories} keyExtractor={(item) => item.id} renderItem={renderSector} />
+                <DraggableFlatList
+                    data={allSectors}
+                    keyExtractor={(item) => item.id}
+                    renderItem={renderSector}
+                    className="mb-14"
+                />
 
                 <Portal>
                     <Modal
                         visible={visibleModalTransferSectorEmployee}
                         onDismiss={() => setVisibleModalTransferSectorEmployee(false)}
                         className="px-2"
-                        contentContainerStyle={{ backgroundColor: "#2a2a2e", padding: 20, borderRadius: 9 }}
+                        contentContainerStyle={{
+                            backgroundColor: "#2a2a2e",
+                            padding: 20,
+                            borderRadius: 9,
+                        }}
                     >
                         <Title title="Mudar para:" />
 
@@ -163,7 +156,10 @@ export default function HistoryIndex({ navigation }) {
                             data={sectorsAvailableToChange}
                             keyExtractor={(item) => item.id}
                             renderItem={({ item }) => (
-                                <Button className="bg-default-3" onPress={() => changeSectorEmployee(item.id)}>
+                                <Button
+                                    className="bg-default-3"
+                                    onPress={() => changeSectorEmployee(item.id)}
+                                >
                                     <Text className="text-gray-200">{item.name}</Text>
                                 </Button>
                             )}
