@@ -1,30 +1,27 @@
-import { useState, useEffect } from "react";
-import { TextInput, View, Text, TouchableOpacity } from "react-native";
+import {
+    TextInput,
+    View,
+    Text,
+    TouchableOpacity,
+    Platform,
+    ToastAndroid,
+    Share,
+    Alert,
+} from "react-native";
 import { storage } from "../../Storage";
 import { FlatList } from "react-native-gesture-handler";
 import { Divider, Icon } from "react-native-paper";
+import { useMMKVObject } from "react-native-mmkv";
+import * as Clipboard from "expo-clipboard";
+import { useEffect, useState } from "react";
+import { globalStyle } from "../../globalStyle";
+import Dialog from "../../components/Dialog";
 
 export default function HomeScaleList() {
-    const [scales, setScales] = useState([]);
-
-    useEffect(() => {
-        const listener = storage.addOnValueChangedListener((changedKey) => {
-            if (changedKey === "scales") {
-                getScalesFromDB();
-            }
-        });
-
-        return () => listener.remove();
-    }, []);
-
-    useEffect(() => getScalesFromDB(), []);
-
-    function getScalesFromDB() {
-        const scales = storage.getString("scales");
-        const scalesObj = scales ? JSON.parse(scales) : [];
-
-        setScales(scalesObj);
-    }
+    const [scales, setScales] = useMMKVObject("scales");
+    const [editScales, setEditScales] = useState({});
+    const [showingDeleteDialog, setShowingDeleteDialog] = useState(false);
+    const [scaleIndexToDelete, setScaleIndexToDelete] = useState(null);
 
     function getEmployeeResponsibleForTheDay(item) {
         if (item.availableEmployees.some((e) => e.name === "Henrique")) {
@@ -210,39 +207,174 @@ export default function HomeScaleList() {
         return value;
     }
 
-    const renderItem = ({ item }) => {
+    function getScaleInText(scale) {
+        const content = `*Noturno B*\n\n${getEmployeeResponsibleForTheDay(
+            scale
+        )}\nDimensionamento ${scale.date}\n\n*${("0" + scale.receptionC.length).slice(
+            -2
+        )} Func. Recepção bloco C*\n ${getEmployeesReceptionC(
+            scale
+        )}\n___________________\n\n*01 Func. Totem*\n*01 Func. Orientador*\n*${(
+            "0" + scale.receptionG.length
+        ).slice(
+            -2
+        )} Func. Recepção bloco G*\n*(equipe faz revezamento entre os locais acima)*\n ${getEmployeesReceptionG(
+            scale
+        )}\n___________________\n\n*${("0" + scale.medicalSupport.length).slice(
+            -2
+        )} Func. Apoio Médico*\n${getEmployeesMedicalSupport(scale)}\n___________________\n\n*${(
+            "0" + scale.concierge.length
+        ).slice(-2)} Func. Concierge*\n${getEmployeesConcierge(scale)}\n___________________\n\n*${(
+            "0" + scale.fastCLM.length
+        ).slice(-2)} Func. Fast Clínica Médica*\n${getEmployeesFastCLM(
+            scale
+        )}\n___________________\n\n*${("0" + scale.fastCollect.length).slice(
+            -2
+        )} Func. Fast Coleta*\n\n${getEmployeesFastCollect(scale)}\n___________________\n\n*${(
+            "0" + scale.observation.length
+        ).slice(-2)} Func. Observação*\n\n${getEmployeesObservation(
+            scale
+        )}\n___________________\n\n*Ausências programadas*\n\n*Folgas - ${(
+            "0" + scale.daysOff.length
+        ).slice(-2)}*\n${getEmployeesDaysOff(scale)}\n\n*Férias - ${(
+            "0" + scale.vacations.length
+        ).slice(-2)}*\n${getEmployeesVacations(
+            scale
+        )}\n___________________\n\n*Ausências não programadas*\n\n*Atestados / Outros - ${(
+            "0" + scale.medicalCertificates.length
+        ).slice(-2)}*\n${getEmployeesMedicalCertificates(scale)}`;
+
+        return content;
+    }
+
+    async function copyToClipboard(index) {
+        const scale = scales[index];
+
+        await Clipboard.setStringAsync(getScaleInText(scale));
+
+        if (Platform.OS === "android") {
+            ToastAndroid.show("Copiado!", ToastAndroid.SHORT);
+        }
+    }
+
+    async function shareScale(index) {
+        const scale = scales[index];
+
+        try {
+            const result = await Share.share({
+                message: getScaleInText(scale),
+            });
+
+            if (result.action === Share.sharedAction) {
+                ToastAndroid.show("Compartilhado!", ToastAndroid.SHORT);
+            }
+        } catch (error) {
+            Alert.alert(error.message);
+        }
+    }
+
+    function startScaleEditing(id) {
+        setEditScales((prevState) => ({ ...prevState, [id]: true }));
+    }
+
+    function cancelScaleEditing(id) {
+        setEditScales((prevState) => ({ ...prevState, [id]: false }));
+    }
+
+    function saveScaleEdit(id) {}
+
+    const renderItem = ({ item, index }) => {
         return (
-            <View className="bg-default-2 mt-3 rounded-lg border border-gray-800 px-4 py-3.5">
+            <View
+                className="bg-default-2 mt-3 rounded-lg border px-4 py-3.5"
+                style={{
+                    borderColor: editScales[index] === true ? globalStyle.theme.primary : "#1f2937",
+                }}
+            >
                 {/* Cabeçalho */}
                 <View className="pb-3">
                     <View className="flex flex-row justify-between">
                         <View>
-                            <TextInput
-                                readOnly
-                                className="font-bold text-gray-200"
-                                value="Noturno B"
-                            />
+                            <TextInput className="font-bold text-gray-200" value="Noturno B" />
                         </View>
 
                         {/* Botões */}
-                        <View className="flex flex-row space-x-2.5">
-                            <TouchableOpacity activeOpacity={0.69}>
-                                <Icon source={"content-copy"} size={20} color="gray" />
-                            </TouchableOpacity>
-                            <TouchableOpacity activeOpacity={0.69}>
-                                <Icon source={"share-variant-outline"} size={20} color="gray" />
-                            </TouchableOpacity>
-                            <TouchableOpacity activeOpacity={0.69}>
-                                <Icon source={"pencil-outline"} size={20} color="gray" />
-                            </TouchableOpacity>
-                            <TouchableOpacity activeOpacity={0.69}>
-                                <Icon source={"trash-can-outline"} size={20} color="gray" />
-                            </TouchableOpacity>
+                        <View className="flex flex-row space-x-2.5 items-center -mt-2">
+                            {/* Copiar */}
+                            {!editScales[index] === true && (
+                                <TouchableOpacity
+                                    activeOpacity={0.69}
+                                    onPress={() => copyToClipboard(index)}
+                                >
+                                    <Icon source={"content-copy"} size={20} color="gray" />
+                                </TouchableOpacity>
+                            )}
+
+                            {/* Compartilhar */}
+                            {!editScales[index] === true && (
+                                <TouchableOpacity
+                                    activeOpacity={0.69}
+                                    onPress={() => shareScale(index)}
+                                >
+                                    <Icon source={"share-variant-outline"} size={20} color="gray" />
+                                </TouchableOpacity>
+                            )}
+
+                            {/* Editar */}
+                            {!editScales[index] === true && (
+                                <TouchableOpacity
+                                    activeOpacity={0.69}
+                                    onPress={() => startScaleEditing(index)}
+                                >
+                                    <Icon source={"pencil-outline"} size={20} color="gray" />
+                                </TouchableOpacity>
+                            )}
+
+                            {/* Salvar Edição */}
+                            {editScales[index] === true && (
+                                <TouchableOpacity
+                                    activeOpacity={0.69}
+                                    onPress={() => startScaleEditing(index)}
+                                    className="p-1"
+                                >
+                                    <Icon
+                                        source={"check"}
+                                        size={21}
+                                        color={globalStyle.theme.primary}
+                                    />
+                                </TouchableOpacity>
+                            )}
+
+                            {/* Cancelar edição */}
+                            {editScales[index] === true && (
+                                <TouchableOpacity
+                                    activeOpacity={0.69}
+                                    onPress={() => cancelScaleEditing(index)}
+                                    className="p-1"
+                                >
+                                    <Text className="text-red-500" style={{ fontSize: 17 }}>
+                                        X
+                                    </Text>
+                                </TouchableOpacity>
+                            )}
+
+                            {/* Excluir */}
+                            {!editScales[index] === true && (
+                                <TouchableOpacity
+                                    activeOpacity={0.69}
+                                    onPress={() => {
+                                        setScaleIndexToDelete(index);
+                                        setShowingDeleteDialog(true);
+                                    }}
+                                >
+                                    <Icon source={"trash-can-outline"} size={20} color="gray" />
+                                </TouchableOpacity>
+                            )}
                         </View>
                     </View>
 
                     <TextInput
-                        readOnly
+                        readOnly={!editScales[index] === true}
                         className="text-gray-200"
                         multiline
                         value={getEmployeeResponsibleForTheDay(item)}
@@ -253,12 +385,12 @@ export default function HomeScaleList() {
                 {/* Recepção C */}
                 <View>
                     <TextInput
-                        readOnly
+                        readOnly={!editScales[index] === true}
                         className="font-semibold text-gray-200"
                         value={`${("0" + item.receptionC.length).slice(-2)} Func. Recepção bloco C`}
                     />
                     <TextInput
-                        readOnly
+                        readOnly={!editScales[index] === true}
                         className="text-gray-200"
                         multiline
                         value={getEmployeesReceptionC(item)}
@@ -270,7 +402,7 @@ export default function HomeScaleList() {
                 {/* Recepção G */}
                 <View>
                     <TextInput
-                        readOnly
+                        readOnly={!editScales[index] === true}
                         className="font-semibold text-gray-200"
                         multiline
                         numberOfLines={4}
@@ -282,7 +414,7 @@ export default function HomeScaleList() {
                         )} Func. Recepção bloco G \n(equipe faz revezamento entre os locais acima)`}
                     />
                     <TextInput
-                        readOnly
+                        readOnly={!editScales[index] === true}
                         className="text-gray-200"
                         multiline
                         value={getEmployeesReceptionG(item)}
@@ -294,13 +426,13 @@ export default function HomeScaleList() {
                 {/* Apoio Médico */}
                 <View>
                     <TextInput
-                        readOnly
+                        readOnly={!editScales[index] === true}
                         className="font-semibold text-gray-200"
                         multiline
                         value={`${("0" + item.medicalSupport.length).slice(-2)} Func. Apoio Médico`}
                     />
                     <TextInput
-                        readOnly
+                        readOnly={!editScales[index] === true}
                         className="text-gray-200"
                         value={getEmployeesMedicalSupport(item)}
                         multiline
@@ -312,13 +444,13 @@ export default function HomeScaleList() {
                 {/* Concierge */}
                 <View>
                     <TextInput
-                        readOnly
+                        readOnly={!editScales[index] === true}
                         className="font-semibold text-gray-200"
                         multiline
                         value={`${("0" + item.concierge.length).slice(-2)} Func. Concierge`}
                     />
                     <TextInput
-                        readOnly
+                        readOnly={!editScales[index] === true}
                         className="text-gray-200"
                         value={getEmployeesConcierge(item)}
                         multiline
@@ -330,13 +462,13 @@ export default function HomeScaleList() {
                 {/* Fast Clínica */}
                 <View>
                     <TextInput
-                        readOnly
+                        readOnly={!editScales[index] === true}
                         className="font-semibold text-gray-200"
                         multiline
                         value={`${("0" + item.fastCLM.length).slice(-2)} Func. Fast Clínica Médica`}
                     />
                     <TextInput
-                        readOnly
+                        readOnly={!editScales[index] === true}
                         className="text-gray-200"
                         value={getEmployeesFastCLM(item)}
                         multiline
@@ -348,13 +480,13 @@ export default function HomeScaleList() {
                 {/* Fast Coleta */}
                 <View>
                     <TextInput
-                        readOnly
+                        readOnly={!editScales[index] === true}
                         className="font-semibold text-gray-200"
                         multiline
                         value={`${("0" + item.fastCollect.length).slice(-2)} Func. Fast Coleta`}
                     />
                     <TextInput
-                        readOnly
+                        readOnly={!editScales[index] === true}
                         className="text-gray-200"
                         value={getEmployeesFastCollect(item)}
                         multiline
@@ -366,13 +498,13 @@ export default function HomeScaleList() {
                 {/* Observação */}
                 <View>
                     <TextInput
-                        readOnly
+                        readOnly={!editScales[index] === true}
                         className="font-semibold text-gray-200"
                         multiline
                         value={`${("0" + item.observation.length).slice(-2)} Func. Observação`}
                     />
                     <TextInput
-                        readOnly
+                        readOnly={!editScales[index] === true}
                         className="text-gray-200"
                         value={getEmployeesObservation(item)}
                         multiline
@@ -386,24 +518,20 @@ export default function HomeScaleList() {
                     <Text className="text-gray-200 -mt-1 font-bold">
                         Ausências programadas {"\n"}
                     </Text>
-                    <Text className="text-gray-200 font-semibold">
-                        Folgas{" "}
-                        {item.daysOff.length ? ` - ${("0" + item.daysOff.length).slice(-2)}` : ""}
-                    </Text>
+                    <TextInput className="text-gray-200 font-semibold">
+                        Folgas - {("0" + item.daysOff.length).slice(-2)}
+                    </TextInput>
                     <TextInput
-                        readOnly
+                        readOnly={!editScales[index] === true}
                         className="text-gray-200 -mt-0.5"
                         value={getEmployeesDaysOff(item)}
                         multiline
                     />
-                    <Text className="text-gray-200 font-semibold mt-4">
-                        Férias
-                        {item.vacations.length
-                            ? ` - ${("0" + item.vacations.length).slice(-2)}`
-                            : ""}
-                    </Text>
+                    <TextInput className="text-gray-200 font-semibold mt-4">
+                        Férias - {("0" + item.vacations.length).slice(-2)}
+                    </TextInput>
                     <TextInput
-                        readOnly
+                        readOnly={!editScales[index] === true}
                         className="text-gray-200 -mt-1"
                         value={getEmployeesVacations(item)}
                         multiline
@@ -417,14 +545,11 @@ export default function HomeScaleList() {
                     <Text className="text-gray-200 -mt-1 font-bold">
                         Ausências não programadas {"\n"}
                     </Text>
-                    <Text className="text-gray-200 font-semibold">
-                        Atestados / Outros
-                        {item.medicalCertificates.length
-                            ? ` - ${("0" + item.medicalCertificates.length).slice(-2)}`
-                            : ""}
-                    </Text>
+                    <TextInput className="text-gray-200 font-semibold">
+                        Atestados / Outros - {("0" + item.medicalCertificates.length).slice(-2)}
+                    </TextInput>
                     <TextInput
-                        readOnly
+                        readOnly={!editScales[index] === true}
                         className="text-gray-200 -mt-0.5"
                         value={getEmployeesMedicalCertificates(item)}
                         multiline
@@ -445,6 +570,15 @@ export default function HomeScaleList() {
             ) : (
                 <Text className="text-center text-gray-400 pt-5">Nenhuma escala gerada...</Text>
             )}
+
+            <Dialog
+                visible={showingDeleteDialog}
+                hideDialog={() => setShowingDeleteDialog(false)}
+                message="Tem certeza de que gostaria de excluir esta escala?"
+                onConfirm={() =>
+                    setScales((prevScales) => prevScales.splice(scaleIndexToDelete, 1))
+                }
+            />
         </View>
     );
 }

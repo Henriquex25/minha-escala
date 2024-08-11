@@ -118,7 +118,13 @@ export default function GenerateScaleIndex({ navigation }) {
         });
 
         saveScalesDB(scales);
-        storage.set("generate-scales", JSON.stringify({}));
+        storage.set(
+            "generate-scales",
+            JSON.stringify({
+                startDate: startDate,
+                endDate: endDate,
+            })
+        );
     }
 
     function getScaleGenerationData() {
