@@ -639,7 +639,7 @@ export default function HomeScaleList() {
 
     return (
         <View>
-            {scales.length > 0 ? (
+            {scales?.length > 0 ? (
                 <FlatList
                     data={scales}
                     keyExtractor={(item, index) => `${item.date}-${index}`}

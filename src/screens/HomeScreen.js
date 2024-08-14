@@ -28,9 +28,6 @@ export default function HomeScreen() {
                 )
             );
         }
-
-        // storage.delete("scales");
-        // storage.delete("histories");
     }, []);
 
     return (
