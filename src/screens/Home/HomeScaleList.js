@@ -1,20 +1,11 @@
-import {
-    TextInput,
-    View,
-    Text,
-    TouchableOpacity,
-    Platform,
-    ToastAndroid,
-    Share,
-    Alert,
-} from "react-native";
-import { storage } from "../../Storage";
-import { FlatList } from "react-native-gesture-handler";
-import { Divider, Icon } from "react-native-paper";
-import { useMMKVObject } from "react-native-mmkv";
+import {Alert, Platform, Share, Text, TextInput, ToastAndroid, TouchableOpacity, View,} from "react-native";
+import {storage} from "../../Storage";
+import {FlatList} from "react-native-gesture-handler";
+import {Divider, Icon} from "react-native-paper";
+import {useMMKVObject} from "react-native-mmkv";
 import * as Clipboard from "expo-clipboard";
-import { useEffect, useState } from "react";
-import { globalStyle } from "../../globalStyle";
+import {useState} from "react";
+import {globalStyle} from "../../globalStyle";
 import Dialog from "../../components/Dialog";
 
 export default function HomeScaleList() {
@@ -22,6 +13,7 @@ export default function HomeScaleList() {
     const [editScales, setEditScales] = useState({});
     const [showingDeleteDialog, setShowingDeleteDialog] = useState(false);
     const [scaleIndexToDelete, setScaleIndexToDelete] = useState(null);
+    const [unsavedChanges, setUnsavedChanges] = useState([]);
 
     function getEmployeeResponsibleForTheDay(item) {
         if (item.availableEmployees.some((e) => e.name === "Henrique")) {
@@ -52,8 +44,17 @@ export default function HomeScaleList() {
         return "Referência: ";
     }
 
-    function getEmployeesReceptionC(item) {
-        const employees = item.receptionC;
+    function getEmployeesReceptionC(scale, index) {
+        if (scale.receptionC?.custom?.employess) {
+            return scale.receptionC.custom.employess;
+        }
+
+
+        if (unsavedChanges[index]?.receptionC?.custom?.employess) {
+            return unsavedChanges[index]?.receptionC?.custom?.employess;
+        }
+
+        const employees = scale.receptionC;
         const time = "🍝 22:50 às 23:10 / 🛏 04:00 às 05:00";
         let value = "";
         let firstItem = true;
@@ -207,13 +208,13 @@ export default function HomeScaleList() {
         return value;
     }
 
-    function getScaleInText(scale) {
-        const content = `*Noturno B*\n\n${getEmployeeResponsibleForTheDay(
+    function getScaleInText(scale, index) {
+        return `*Noturno B*\n\n${getEmployeeResponsibleForTheDay(
             scale
         )}\nDimensionamento ${scale.date}\n\n*${("0" + scale.receptionC.length).slice(
             -2
         )} Func. Recepção bloco C*\n ${getEmployeesReceptionC(
-            scale
+            scale, index
         )}\n___________________\n\n*01 Func. Totem*\n*01 Func. Orientador*\n*${(
             "0" + scale.receptionG.length
         ).slice(
@@ -243,14 +244,12 @@ export default function HomeScaleList() {
         )}\n___________________\n\n*Ausências não programadas*\n\n*Atestados / Outros - ${(
             "0" + scale.medicalCertificates.length
         ).slice(-2)}*\n${getEmployeesMedicalCertificates(scale)}`;
-
-        return content;
     }
 
     async function copyToClipboard(index) {
         const scale = scales[index];
 
-        await Clipboard.setStringAsync(getScaleInText(scale));
+        await Clipboard.setStringAsync(getScaleInText(scale, index));
 
         if (Platform.OS === "android") {
             ToastAndroid.show("Copiado!", ToastAndroid.SHORT);
@@ -262,7 +261,7 @@ export default function HomeScaleList() {
 
         try {
             const result = await Share.share({
-                message: getScaleInText(scale),
+                message: getScaleInText(scale, index),
             });
 
             if (result.action === Share.sharedAction) {
@@ -273,17 +272,47 @@ export default function HomeScaleList() {
         }
     }
 
-    function startScaleEditing(id) {
-        setEditScales((prevState) => ({ ...prevState, [id]: true }));
+    function startScaleEditing(index) {
+        setEditScales((prevState) => ({...prevState, [index]: true}));
     }
 
-    function cancelScaleEditing(id) {
-        setEditScales((prevState) => ({ ...prevState, [id]: false }));
+    function cancelScaleEditing(sectorId) {
+        const changes = [...unsavedChanges];
+
+        changes[sectorId] = []
+
+        setUnsavedChanges(changes)
+
+        setEditScales((prevState) => ({...prevState, [sectorId]: false}));
     }
 
-    function saveScaleEdit(id) {}
+    function whenModificationIsInitiated(sectorID, index, modification, value) {
+        setUnsavedChanges((prevState) => {
+            const state = [...prevState]
 
-    const renderItem = ({ item, index }) => {
+            if (!state[index]?.[sectorID]) {
+
+                state[index] = {
+                    ...state[index],
+                    [sectorID]: {
+                        [modification]: value
+                    }
+                }
+
+                return state
+            }
+
+            state[index][sectorID][modification] = value
+
+            return state
+        })
+
+    }
+
+    function saveScaleEdit(index) {
+    }
+
+    const renderItem = ({item, index}) => {
         return (
             <View
                 className="bg-default-2 mt-3 rounded-lg border px-4 py-3.5"
@@ -295,7 +324,7 @@ export default function HomeScaleList() {
                 <View className="pb-3">
                     <View className="flex flex-row justify-between">
                         <View>
-                            <TextInput className="font-bold text-gray-200" value="Noturno B" />
+                            <Text className="font-bold text-gray-200">Noturno B</Text>
                         </View>
 
                         {/* Botões */}
@@ -306,7 +335,7 @@ export default function HomeScaleList() {
                                     activeOpacity={0.69}
                                     onPress={() => copyToClipboard(index)}
                                 >
-                                    <Icon source={"content-copy"} size={20} color="gray" />
+                                    <Icon source={"content-copy"} size={20} color="gray"/>
                                 </TouchableOpacity>
                             )}
 
@@ -316,25 +345,25 @@ export default function HomeScaleList() {
                                     activeOpacity={0.69}
                                     onPress={() => shareScale(index)}
                                 >
-                                    <Icon source={"share-variant-outline"} size={20} color="gray" />
+                                    <Icon source={"share-variant-outline"} size={20} color="gray"/>
                                 </TouchableOpacity>
                             )}
 
                             {/* Editar */}
-                            {!editScales[index] === true && (
-                                <TouchableOpacity
-                                    activeOpacity={0.69}
-                                    onPress={() => startScaleEditing(index)}
-                                >
-                                    <Icon source={"pencil-outline"} size={20} color="gray" />
-                                </TouchableOpacity>
-                            )}
+                            {/*{!editScales[index] === true && (*/}
+                            {/*    <TouchableOpacity*/}
+                            {/*        activeOpacity={0.69}*/}
+                            {/*        onPress={() => startScaleEditing(index)}*/}
+                            {/*    >*/}
+                            {/*        <Icon source={"pencil-outline"} size={20} color="gray"/>*/}
+                            {/*    </TouchableOpacity>*/}
+                            {/*)}*/}
 
                             {/* Salvar Edição */}
                             {editScales[index] === true && (
                                 <TouchableOpacity
                                     activeOpacity={0.69}
-                                    onPress={() => startScaleEditing(index)}
+                                    onPress={() => saveScaleEdit(index)}
                                     className="p-1"
                                 >
                                     <Icon
@@ -352,7 +381,7 @@ export default function HomeScaleList() {
                                     onPress={() => cancelScaleEditing(index)}
                                     className="p-1"
                                 >
-                                    <Text className="text-red-500" style={{ fontSize: 17 }}>
+                                    <Text className="text-red-500" style={{fontSize: 17}}>
                                         X
                                     </Text>
                                 </TouchableOpacity>
@@ -367,7 +396,7 @@ export default function HomeScaleList() {
                                         setShowingDeleteDialog(true);
                                     }}
                                 >
-                                    <Icon source={"trash-can-outline"} size={20} color="gray" />
+                                    <Icon source={"trash-can-outline"} size={20} color="gray"/>
                                 </TouchableOpacity>
                             )}
                         </View>
@@ -377,7 +406,9 @@ export default function HomeScaleList() {
                         readOnly={!editScales[index] === true}
                         className="text-gray-200"
                         multiline
-                        value={getEmployeeResponsibleForTheDay(item)}
+                        spellCheck={false}
+                        value={unsavedChanges[index]?.employeeResponsibleForTheDay?.label ? unsavedChanges[index].employeeResponsibleForTheDay.label : getEmployeeResponsibleForTheDay(item)}
+                        onChangeText={(text) => whenModificationIsInitiated("employeeResponsibleForTheDay", index, "label", text)}
                     />
                     <Text className="text-gray-200 -mt-1">Dimensionamento {item.date}</Text>
                 </View>
@@ -387,17 +418,21 @@ export default function HomeScaleList() {
                     <TextInput
                         readOnly={!editScales[index] === true}
                         className="font-semibold text-gray-200"
-                        value={`${("0" + item.receptionC.length).slice(-2)} Func. Recepção bloco C`}
+                        spellCheck={false}
+                        value={unsavedChanges[index]?.receptionC?.label ? unsavedChanges[index].receptionC.label : `${("0" + item.receptionC.length).slice(-2)} Func. Recepção bloco C`}
+                        onChangeText={(text) => whenModificationIsInitiated("receptionC", index, "label", text)}
                     />
                     <TextInput
                         readOnly={!editScales[index] === true}
                         className="text-gray-200"
                         multiline
-                        value={getEmployeesReceptionC(item)}
+                        spellCheck={false}
+                        value={unsavedChanges[index]?.receptionC?.employees ? unsavedChanges[index].receptionC.employees : getEmployeesReceptionC(item, index)}
+                        onChangeText={(text) => whenModificationIsInitiated("receptionC", index, "employees", text)}
                     />
                 </View>
 
-                <Divider className="my-3" />
+                <Divider className="my-3"/>
 
                 {/* Recepção G */}
                 <View>
@@ -405,23 +440,27 @@ export default function HomeScaleList() {
                         readOnly={!editScales[index] === true}
                         className="font-semibold text-gray-200"
                         multiline
+                        spellCheck={false}
                         numberOfLines={4}
-                        value={`01 Func. Totem \n01 Func. Orientador \n${(
+                        value={unsavedChanges[index]?.receptionG?.label ? unsavedChanges[index].receptionG.label : `01 Func. Totem \n01 Func. Orientador \n${(
                             "0" +
                             (item.receptionG.length - 2)
                         ).slice(
                             -2
                         )} Func. Recepção bloco G \n(equipe faz revezamento entre os locais acima)`}
+                        onChangeText={(text) => whenModificationIsInitiated("receptionG", index, "label", text)}
                     />
                     <TextInput
                         readOnly={!editScales[index] === true}
                         className="text-gray-200"
                         multiline
-                        value={getEmployeesReceptionG(item)}
+                        spellCheck={false}
+                        value={unsavedChanges[index]?.receptionG?.employees ? unsavedChanges[index].receptionG.employees : getEmployeesReceptionG(item)}
+                        onChangeText={(text) => whenModificationIsInitiated("receptionG", index, "employees", text)}
                     />
                 </View>
 
-                <Divider className="my-3" />
+                <Divider className="my-3"/>
 
                 {/* Apoio Médico */}
                 <View>
@@ -429,17 +468,21 @@ export default function HomeScaleList() {
                         readOnly={!editScales[index] === true}
                         className="font-semibold text-gray-200"
                         multiline
-                        value={`${("0" + item.medicalSupport.length).slice(-2)} Func. Apoio Médico`}
+                        spellCheck={false}
+                        value={unsavedChanges[index]?.medicalSupport?.label ? unsavedChanges[index].medicalSupport.label : `${("0" + item.medicalSupport.length).slice(-2)} Func. Apoio Médico`}
+                        onChangeText={(text) => whenModificationIsInitiated("medicalSupport", index, "label", text)}
                     />
                     <TextInput
                         readOnly={!editScales[index] === true}
                         className="text-gray-200"
-                        value={getEmployeesMedicalSupport(item)}
                         multiline
+                        spellCheck={false}
+                        value={unsavedChanges[index]?.medicalSupport?.employees ? unsavedChanges[index].medicalSupport.employees : getEmployeesMedicalSupport(item)}
+                        onChangeText={(text) => whenModificationIsInitiated("medicalSupport", index, "employees", text)}
                     />
                 </View>
 
-                <Divider className="my-3" />
+                <Divider className="my-3"/>
 
                 {/* Concierge */}
                 <View>
@@ -447,17 +490,21 @@ export default function HomeScaleList() {
                         readOnly={!editScales[index] === true}
                         className="font-semibold text-gray-200"
                         multiline
-                        value={`${("0" + item.concierge.length).slice(-2)} Func. Concierge`}
+                        spellCheck={false}
+                        value={unsavedChanges[index]?.concierge?.label ? unsavedChanges[index].concierge.label : `${("0" + item.concierge.length).slice(-2)} Func. Concierge`}
+                        onChangeText={(text) => whenModificationIsInitiated("concierge", index, "label", text)}
                     />
                     <TextInput
                         readOnly={!editScales[index] === true}
                         className="text-gray-200"
-                        value={getEmployeesConcierge(item)}
                         multiline
+                        spellCheck={false}
+                        value={unsavedChanges[index]?.concierge?.employees ? unsavedChanges[index].concierge.employees : getEmployeesConcierge(item)}
+                        onChangeText={(text) => whenModificationIsInitiated("concierge", index, "employees", text)}
                     />
                 </View>
 
-                <Divider className="my-3" />
+                <Divider className="my-3"/>
 
                 {/* Fast Clínica */}
                 <View>
@@ -465,17 +512,21 @@ export default function HomeScaleList() {
                         readOnly={!editScales[index] === true}
                         className="font-semibold text-gray-200"
                         multiline
-                        value={`${("0" + item.fastCLM.length).slice(-2)} Func. Fast Clínica Médica`}
+                        spellCheck={false}
+                        value={unsavedChanges[index]?.fastCLM?.label ? unsavedChanges[index].fastCLM.label : `${("0" + item.fastCLM.length).slice(-2)} Func. Fast Clínica Médica`}
+                        onChangeText={(text) => whenModificationIsInitiated("fastCLM", index, "label", text)}
                     />
                     <TextInput
                         readOnly={!editScales[index] === true}
                         className="text-gray-200"
-                        value={getEmployeesFastCLM(item)}
                         multiline
+                        spellCheck={false}
+                        value={unsavedChanges[index]?.fastCLM?.employees ? unsavedChanges[index].fastCLM.employees : getEmployeesFastCLM(item)}
+                        onChangeText={(text) => whenModificationIsInitiated("fastCLM", index, "employees", text)}
                     />
                 </View>
 
-                <Divider className="my-3" />
+                <Divider className="my-3"/>
 
                 {/* Fast Coleta */}
                 <View>
@@ -483,17 +534,21 @@ export default function HomeScaleList() {
                         readOnly={!editScales[index] === true}
                         className="font-semibold text-gray-200"
                         multiline
-                        value={`${("0" + item.fastCollect.length).slice(-2)} Func. Fast Coleta`}
+                        spellCheck={false}
+                        value={unsavedChanges[index]?.fastCollect?.label ? unsavedChanges[index].fastCollect.label : `${("0" + item.fastCollect.length).slice(-2)} Func. Fast Coleta`}
+                        onChangeText={(text) => whenModificationIsInitiated("fastCollect", index, "label", text)}
                     />
                     <TextInput
                         readOnly={!editScales[index] === true}
                         className="text-gray-200"
-                        value={getEmployeesFastCollect(item)}
                         multiline
+                        spellCheck={false}
+                        value={unsavedChanges[index]?.fastCollect?.employees ? unsavedChanges[index].fastCollect.employees : getEmployeesFastCollect(item)}
+                        onChangeText={(text) => whenModificationIsInitiated("fastCollect", index, "employees", text)}
                     />
                 </View>
 
-                <Divider className="my-3" />
+                <Divider className="my-3"/>
 
                 {/* Observação */}
                 <View>
@@ -501,58 +556,81 @@ export default function HomeScaleList() {
                         readOnly={!editScales[index] === true}
                         className="font-semibold text-gray-200"
                         multiline
-                        value={`${("0" + item.observation.length).slice(-2)} Func. Observação`}
+                        spellCheck={false}
+                        value={unsavedChanges[index]?.observation?.label ? unsavedChanges[index].observation.label : `${("0" + item.observation.length).slice(-2)} Func. Observação`}
+                        onChangeText={(text) => whenModificationIsInitiated("observation", index, "label", text)}
                     />
                     <TextInput
                         readOnly={!editScales[index] === true}
                         className="text-gray-200"
-                        value={getEmployeesObservation(item)}
                         multiline
+                        spellCheck={false}
+                        value={unsavedChanges[index]?.observation?.employees ? unsavedChanges[index].observation.employees : getEmployeesObservation(item)}
+                        onChangeText={(text) => whenModificationIsInitiated("observation", index, "employees", text)}
                     />
                 </View>
 
-                <Divider className="my-3" />
+                <Divider className="my-3"/>
 
                 {/* Ausências programadas */}
                 <View>
                     <Text className="text-gray-200 -mt-1 font-bold">
                         Ausências programadas {"\n"}
                     </Text>
-                    <TextInput className="text-gray-200 font-semibold">
-                        Folgas - {("0" + item.daysOff.length).slice(-2)}
-                    </TextInput>
+                    <TextInput
+                        className="text-gray-200 font-semibold"
+                        readOnly={!editScales[index] === true}
+                        spellCheck={false}
+                        value={unsavedChanges[index]?.scheduledAbsences?.daysOffLabel ? unsavedChanges[index].scheduledAbsences.daysOffLabel : `Folgas - ${("0" + item.daysOff.length).slice(-2)}`}
+                        onChangeText={(text) => whenModificationIsInitiated("scheduledAbsences", index, "daysOffLabel", text)}
+                    />
                     <TextInput
                         readOnly={!editScales[index] === true}
                         className="text-gray-200 -mt-0.5"
-                        value={getEmployeesDaysOff(item)}
                         multiline
+                        spellCheck={false}
+                        value={unsavedChanges[index]?.scheduledAbsences?.daysOffEmployees ? unsavedChanges[index].scheduledAbsences.daysOffEmployees : getEmployeesDaysOff(item)}
+                        onChangeText={(text) => whenModificationIsInitiated("scheduledAbsences", index, "daysOffEmployees", text)}
                     />
-                    <TextInput className="text-gray-200 font-semibold mt-4">
-                        Férias - {("0" + item.vacations.length).slice(-2)}
-                    </TextInput>
+                    <TextInput
+                        className="text-gray-200 font-semibold mt-4"
+                        readOnly={!editScales[index] === true}
+                        spellCheck={false}
+                        value={unsavedChanges[index]?.scheduledAbsences?.vacationsLabel ? unsavedChanges[index].scheduledAbsences.vacationsLabel : `Férias - ${("0" + item.vacations.length).slice(-2)}`}
+                        onChangeText={(text) => whenModificationIsInitiated("scheduledAbsences", index, "vacationsLabel", text)}
+                    />
                     <TextInput
                         readOnly={!editScales[index] === true}
                         className="text-gray-200 -mt-1"
-                        value={getEmployeesVacations(item)}
                         multiline
+                        spellCheck={false}
+                        value={unsavedChanges[index]?.scheduledAbsences?.vacationsEmployees ? unsavedChanges[index].scheduledAbsences.vacationsEmployees : getEmployeesVacations(item)}
+                        onChangeText={(text) => whenModificationIsInitiated("scheduledAbsences", index, "vacationsEmployees", text)}
                     />
                 </View>
 
-                <Divider className="my-3" />
+                <Divider className="my-3"/>
 
                 {/* Ausências não programadas */}
                 <View>
                     <Text className="text-gray-200 -mt-1 font-bold">
                         Ausências não programadas {"\n"}
                     </Text>
-                    <TextInput className="text-gray-200 font-semibold">
-                        Atestados / Outros - {("0" + item.medicalCertificates.length).slice(-2)}
-                    </TextInput>
+                    <TextInput
+                        className="text-gray-200 font-semibold"
+                        readOnly={!editScales[index] === true}
+                        spellCheck={false}
+                        value={unsavedChanges[index]?.unscheduledAbsences?.medicalCertificatesLabel ? unsavedChanges[index].unscheduledAbsences.medicalCertificatesLabel : `Atestados / Outros - ${("0" + item.medicalCertificates.length).slice(-2)}`}
+                        onChangeText={(text) => whenModificationIsInitiated("unscheduledAbsences", index, "medicalCertificatesLabel", text)}
+                    />
+
                     <TextInput
                         readOnly={!editScales[index] === true}
                         className="text-gray-200 -mt-0.5"
-                        value={getEmployeesMedicalCertificates(item)}
                         multiline
+                        spellCheck={false}
+                        value={unsavedChanges[index]?.unscheduledAbsences?.medicalCertificatesEmployees ? unsavedChanges[index].unscheduledAbsences.medicalCertificatesEmployees : getEmployeesMedicalCertificates(item)}
+                        onChangeText={(text) => whenModificationIsInitiated("unscheduledAbsences", index, "medicalCertificatesEmployees", text)}
                     />
                 </View>
             </View>
@@ -575,9 +653,13 @@ export default function HomeScaleList() {
                 visible={showingDeleteDialog}
                 hideDialog={() => setShowingDeleteDialog(false)}
                 message="Tem certeza de que gostaria de excluir esta escala?"
-                onConfirm={() =>
-                    setScales((prevScales) => prevScales.splice(scaleIndexToDelete, 1))
-                }
+                onConfirm={() => {
+                    setScales((oldScales) =>
+                        oldScales.filter((_, index) => index !== scaleIndexToDelete)
+                    );
+                    setShowingDeleteDialog(false);
+                    setScaleIndexToDelete(0);
+                }}
             />
         </View>
     );

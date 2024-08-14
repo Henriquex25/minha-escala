@@ -54,16 +54,20 @@ export default function GenerateScaleIndex({ navigation }) {
         const scaleGenerationData = getScaleGenerationData();
         const dates = generateDates();
 
-        if (Object.keys(scaleGenerationData).length === 0) {
-            // TODO: Mostrar erros de validação
-            return;
-        }
+        storage.set(
+            "generate-scales",
+            JSON.stringify({
+                daysOff: [],
+                medicalCertificates: [],
+                vacations: [],
+            })
+        );
 
         dates.forEach((date) => {
             let histories = getHistories();
             let availableEmployees = JSON.parse(storage.getString("employees") ?? "[]");
             let employeesOnLeave = availableEmployees.filter((e) =>
-                scaleGenerationData.daysOff.some(
+                scaleGenerationData.daysOff?.some(
                     (d) => d.employee.id === e.id && d.dates.some((dayOff) => dayOff === date)
                 )
             );
@@ -121,8 +125,9 @@ export default function GenerateScaleIndex({ navigation }) {
         storage.set(
             "generate-scales",
             JSON.stringify({
-                startDate: startDate,
-                endDate: endDate,
+                daysOff: [],
+                medicalCertificates: [],
+                vacations: [],
             })
         );
     }
