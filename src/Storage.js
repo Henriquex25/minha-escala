@@ -1,16 +1,16 @@
-import { MMKV } from "react-native-mmkv";
+import {MMKV} from "react-native-mmkv";
 
 export const storage = new MMKV();
 
 export const allSectors = [
-    { id: "observation", name: "Observação" },
-    { id: "receptionC", name: "Recepção C" },
-    { id: "receptionG", name: "Recepção G" },
-    { id: "medicalSupport", name: "Apoio Médico" },
-    { id: "fastCLM", name: "Fast CLM" },
-    { id: "fastCollect", name: "Fast Coleta" },
-    { id: "fastMedication", name: "Fast Medicação" },
-    { id: "concierge", name: "Concierge" },
+    {id: "observation", name: "Observação"},
+    {id: "receptionC", name: "Recepção C"},
+    {id: "receptionG", name: "Recepção G"},
+    {id: "medicalSupport", name: "Apoio Médico"},
+    {id: "fastCLM", name: "Fast CLM"},
+    {id: "fastCollect", name: "Fast Coleta"},
+    {id: "fastMedication", name: "Fast Medicação"},
+    {id: "concierge", name: "Concierge"},
 ];
 
 export const allEmployees = [
@@ -318,6 +318,23 @@ export const allEmployees = [
             fastCollect: false,
             fastMedication: false,
             concierge: true,
+        },
+    },
+    {
+        id: 19,
+        name: "Elis",
+        leadership: false,
+        firstReference: false,
+        secondReference: false,
+        sectors: {
+            receptionC: false,
+            receptionG: true,
+            medicalSupport: false,
+            observation: false,
+            fastCLM: false,
+            fastCollect: false,
+            fastMedication: false,
+            concierge: false,
         },
     },
 ];

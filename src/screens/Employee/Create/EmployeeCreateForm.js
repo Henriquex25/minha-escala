@@ -1,17 +1,21 @@
-import { useState } from "react";
-import { TouchableOpacity, View, Text, Platform, ToastAndroid } from "react-native";
-import { Checkbox, TextInput } from "react-native-paper";
-import { storage, allSectors } from "../../../Storage";
+import {useState} from "react";
+import {TouchableOpacity, View, Text, Platform, ToastAndroid} from "react-native";
+import {Checkbox, TextInput} from "react-native-paper";
+import {storage, allSectors} from "../../../Storage";
 import Label from "../../../components/Label";
+import {globalStyle} from "../../../globalStyle";
 
-export default function SectorCreateForm({ hideModal = () => {} }) {
+export default function SectorCreateForm({
+                                             hideModal = () => {
+                                             }
+                                         }) {
     const [name, setName] = useState("");
     const [leadership, setLeadership] = useState(false);
     const [firstReference, setFirstReference] = useState(false);
     const [secondReference, setSecondReference] = useState(false);
     const [sectors, setSectors] = useState(
         allSectors.map((s) => {
-            return { [s.id]: false };
+            return {[s.id]: false};
         })
     );
 
@@ -41,16 +45,19 @@ export default function SectorCreateForm({ hideModal = () => {} }) {
 
     return (
         <>
-            <Label label="Nome" />
+            <Label label="Nome"/>
             <TextInput
                 label="Nome"
-                value={name}
                 onChangeText={setName}
-                style={{ backgroundColor: "#3a3a40", marginBottom: 20 }}
+                style={{backgroundColor: "#3a3a40", marginBottom: 20}}
+                textColor={"#e5e7eb"}
+                underlineColor="#38bdf8"
+                activeUnderlineColor="#0369a1"
+
             />
 
             {/* Liderança e referências */}
-            <Label label="Liderança e referências" />
+            <Label label="Liderança e referências"/>
             <View className="flex flex-row flex-wrap mb-3">
                 {/* Liderança */}
                 <View className="w-5/12 flex flex-row items-center">
@@ -59,10 +66,11 @@ export default function SectorCreateForm({ hideModal = () => {} }) {
                         onPress={() => {
                             setLeadership(!leadership);
                         }}
+                        color={globalStyle.theme.primary}
                     />
                     <Label
                         label="Liderança"
-                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
+                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
                         onPress={() => {
                             setLeadership(!leadership);
                         }}
@@ -76,10 +84,11 @@ export default function SectorCreateForm({ hideModal = () => {} }) {
                         onPress={() => {
                             setFirstReference(!firstReference);
                         }}
+                        color={globalStyle.theme.primary}
                     />
                     <Label
                         label="1ª Referência"
-                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
+                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
                         onPress={() => {
                             setFirstReference(!firstReference);
                         }}
@@ -93,10 +102,11 @@ export default function SectorCreateForm({ hideModal = () => {} }) {
                         onPress={() => {
                             setSecondReference(!secondReference);
                         }}
+                        color={globalStyle.theme.primary}
                     />
                     <Label
                         label="2ª Referência"
-                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
+                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
                         onPress={() => {
                             setSecondReference(!secondReference);
                         }}
@@ -105,19 +115,20 @@ export default function SectorCreateForm({ hideModal = () => {} }) {
             </View>
 
             {/* Setores */}
-            <Label label="Setores" />
+            <Label label="Setores"/>
             <View className="flex flex-row flex-wrap">
                 {/* Recepção bloco C */}
                 <View className="w-5/12 flex flex-row items-center">
                     <Checkbox
                         status={sectors.receptionC ? "checked" : "unchecked"}
                         onPress={() => {
-                            setSectors({ ...sectors, receptionC: !sectors.receptionC });
+                            setSectors({...sectors, receptionC: !sectors.receptionC});
                         }}
+                        color={globalStyle.theme.primary}
                     />
                     <Label
                         label="Recep. C"
-                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
+                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
                         onPress={() => {
                             setSectors({
                                 ...sectors,
@@ -137,10 +148,11 @@ export default function SectorCreateForm({ hideModal = () => {} }) {
                                 receptionG: !sectors.receptionG,
                             });
                         }}
+                        color={globalStyle.theme.primary}
                     />
                     <Label
                         label="Recep. G"
-                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
+                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
                         onPress={() => {
                             setSectors({
                                 ...sectors,
@@ -160,10 +172,11 @@ export default function SectorCreateForm({ hideModal = () => {} }) {
                                 medicalSupport: !sectors.medicalSupport,
                             });
                         }}
+                        color={globalStyle.theme.primary}
                     />
                     <Label
                         label="Apoio"
-                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
+                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
                         onPress={() => {
                             setSectors({
                                 ...sectors,
@@ -183,10 +196,11 @@ export default function SectorCreateForm({ hideModal = () => {} }) {
                                 observation: !sectors.observation,
                             });
                         }}
+                        color={globalStyle.theme.primary}
                     />
                     <Label
                         label="Observação"
-                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
+                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
                         onPress={() => {
                             setSectors({
                                 ...sectors,
@@ -206,10 +220,11 @@ export default function SectorCreateForm({ hideModal = () => {} }) {
                                 fastCLM: !sectors.fastCLM,
                             });
                         }}
+                        color={globalStyle.theme.primary}
                     />
                     <Label
                         label="Fast CLM"
-                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
+                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
                         onPress={() => {
                             setSectors({
                                 ...sectors,
@@ -229,10 +244,11 @@ export default function SectorCreateForm({ hideModal = () => {} }) {
                                 fastCollect: !sectors.fastCollect,
                             });
                         }}
+                        color={globalStyle.theme.primary}
                     />
                     <Label
                         label="Fast Coleta"
-                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
+                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
                         onPress={() => {
                             setSectors({
                                 ...sectors,
@@ -252,10 +268,11 @@ export default function SectorCreateForm({ hideModal = () => {} }) {
                                 fastMedication: !sectors.fastMedication,
                             });
                         }}
+                        color={globalStyle.theme.primary}
                     />
                     <Label
                         label="Fast Med."
-                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
+                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
                         onPress={() => {
                             setSectors({
                                 ...sectors,
@@ -275,10 +292,11 @@ export default function SectorCreateForm({ hideModal = () => {} }) {
                                 concierge: !sectors.concierge,
                             });
                         }}
+                        color={globalStyle.theme.primary}
                     />
                     <Label
                         label="Concierge"
-                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
+                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
                         onPress={() => {
                             setSectors({
                                 ...sectors,
@@ -289,22 +307,22 @@ export default function SectorCreateForm({ hideModal = () => {} }) {
                 </View>
             </View>
 
-            {/* Botão de voltar */}
-            <TouchableOpacity
-                activeOpacity={0.78}
-                className="mt-7 w-full bg-gray-600 h-12 rounded-3xl flex justify-center items-center"
-                onPress={hideModal}
-            >
-                <Text className="text-gray-200 text-center text-lg">Voltar</Text>
-            </TouchableOpacity>
-
             {/* Botão de salvar */}
             <TouchableOpacity
                 activeOpacity={0.78}
-                className="mt-3 w-full bg-primary-600 h-12 rounded-3xl flex justify-center items-center"
+                className="mt-7 w-full bg-primary-600 h-12 rounded-3xl flex justify-center items-center"
                 onPress={saveEmployee}
             >
                 <Text className="text-gray-200 text-center text-lg">Adicionar</Text>
+            </TouchableOpacity>
+
+            {/* Botão de voltar */}
+            <TouchableOpacity
+                activeOpacity={0.78}
+                className="mt-3 w-full bg-transparent h-12 rounded-3xl flex justify-center items-center"
+                onPress={hideModal}
+            >
+                <Text className="text-gray-200 text-center text-lg">Voltar</Text>
             </TouchableOpacity>
         </>
     );

@@ -1,4 +1,4 @@
-rootProject.name = 'minha-escala'
+rootProject.name = 'Minha escala'
 
 dependencyResolutionManagement {
   versionCatalogs {

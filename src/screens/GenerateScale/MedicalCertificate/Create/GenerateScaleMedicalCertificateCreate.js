@@ -1,12 +1,12 @@
-import { useState, useEffect } from "react";
-import { View, Text, FlatList, TouchableOpacity } from "react-native";
-import { Button, Divider, Searchbar, PaperProvider } from "react-native-paper";
-import { storage } from "../../../../Storage";
+import {useState, useEffect} from "react";
+import {View, Text, FlatList, TouchableOpacity} from "react-native";
+import {Button, Divider, Searchbar, PaperProvider} from "react-native-paper";
+import {storage} from "../../../../Storage";
 import moment from "moment";
 import Label from "../../../../components/Label";
 import DateTimeInput from "../../../../components/form/DateTimeInput";
 
-export default function GenerateScaleMedicalCertificateCreate({ navigation }) {
+export default function GenerateScaleMedicalCertificateCreate({navigation}) {
     const [searchQuery, setSearchQuery] = useState("");
     const [employees, setEmployees] = useState([]);
     const [employeesFound, setEmployeesFound] = useState([]);
@@ -112,20 +112,20 @@ export default function GenerateScaleMedicalCertificateCreate({ navigation }) {
                         <Searchbar
                             placeholder="Pesquisar funcionário"
                             className="mt-3 bg-default-3 text-gray-200 mb-3"
-                            inputStyle={{ color: "#e5e7eb" }}
+                            inputStyle={{color: "#e5e7eb"}}
                             iconColor="#0ea5e9"
                             placeholderTextColor={"#9ca3af"}
                             value={searchQuery}
                             onChangeText={(query) => {
                                 setSearchQuery(query);
-                                setEmployeesFound(employees.filter((employee) => employee.name.toLowerCase().includes(query.toLowerCase())));
+                                setEmployeesFound(employees.filter((employee) => employee.name.toLowerCase().trim().includes(query.toLowerCase().trim())));
                             }}
                         />
 
                         {employeesFound.length > 0 ? (
                             <FlatList
                                 data={employeesFound}
-                                renderItem={({ item }) => (
+                                renderItem={({item}) => (
                                     <View className="flex flex-row items-center justify-center px-2.5 mb-2">
                                         <Button
                                             mode="elevated"
@@ -154,25 +154,27 @@ export default function GenerateScaleMedicalCertificateCreate({ navigation }) {
                     <View>
                         {/* Funcionário selecionado */}
                         <View className="relative">
-                            <Text className="text-primary-400 font-semibold text-lg text-center">{employeeSelectedToAddMedicalCertificate.name}</Text>
+                            <Text
+                                className="text-primary-400 font-semibold text-lg text-center">{employeeSelectedToAddMedicalCertificate.name}</Text>
                         </View>
 
-                        <Divider className="my-6 bg-primary-500/40" />
+                        <Divider className="my-6 bg-primary-500/40"/>
 
                         {/* Data inicial */}
                         <View>
-                            <Label label="Início" />
-                            <DateTimeInput value={startDate} onValueChange={(value) => setStartDate(value)} />
+                            <Label label="Início"/>
+                            <DateTimeInput value={startDate} onValueChange={(value) => setStartDate(value)}/>
                         </View>
 
                         {/* Data final */}
                         <View className="mt-5">
-                            <Label label="Fim" />
-                            <DateTimeInput value={endDate} onValueChange={(value) => setEndDate(value)} />
+                            <Label label="Fim"/>
+                            <DateTimeInput value={endDate} onValueChange={(value) => setEndDate(value)}/>
                         </View>
 
                         {/* Botão de salvar */}
-                        <Button className="mt-7 bg-primary-500" mode="elevated" onPress={saveMedicalCertificates} textColor="black">
+                        <Button className="mt-7 bg-primary-500" mode="elevated" onPress={saveMedicalCertificates}
+                                textColor="black">
                             Salvar
                         </Button>
                     </View>

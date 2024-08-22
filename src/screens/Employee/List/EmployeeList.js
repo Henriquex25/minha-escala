@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { View, FlatList, Text, Platform, ToastAndroid } from "react-native";
-import { Menu, Icon, IconButton } from "react-native-paper";
+import { Menu, Icon, IconButton, TextInput, Searchbar } from "react-native-paper";
 import { storage } from "../../../Storage";
 import Dialog from "../../../components/Dialog";
 
 export default function EmployeeList({ navigation }) {
     const [employees, setEmployees] = useState([]);
+    const [allEmployees, setAllEmployees] = useState([]);
     const [visibleMenus, setVisibleMenus] = useState({});
     const [showingDeleteDialog, setShowingDeleteDialog] = useState(false);
     const [employeeIdToDelete, setEmployeeIdToDelete] = useState(0);
@@ -28,8 +29,10 @@ export default function EmployeeList({ navigation }) {
 
     function fetchEmployees() {
         const storedEmployees = storage.getString("employees");
+        const storedEmployeesObj = storedEmployees ? JSON.parse(storedEmployees) : [];
 
-        setEmployees(storedEmployees ? JSON.parse(storedEmployees) : []);
+        setEmployees(storedEmployeesObj);
+        setAllEmployees(storedEmployeesObj);
     }
 
     function deleteEmployee() {
@@ -63,8 +66,30 @@ export default function EmployeeList({ navigation }) {
 
     return (
         <View className="mt-2 mb-14">
+            {/* Filtrar funcionários */}
+            <View>
+                <Searchbar
+                    placeholder="Pesquisar funcionário"
+                    className="mt-3 bg-default-3 text-gray-200 mb-3 rounded-3xl"
+                    inputStyle={{ color: "#e5e7eb" }}
+                    iconColor="#0ea5e9"
+                    placeholderTextColor={"#9ca3af"}
+                    onChangeText={(query) => {
+                        setEmployees(
+                            allEmployees.filter((employee) =>
+                                employee.name
+                                    .toLowerCase()
+                                    .trim()
+                                    .includes(query.toLowerCase().trim())
+                            )
+                        );
+                    }}
+                />
+            </View>
+
             {employees.length > 0 ? (
                 <FlatList
+                    className="mb-14"
                     data={employees}
                     renderItem={({ item }) => (
                         <View className="flex flex-row items-center bg-default-3 pl-2.5 rounded-lg mb-2">

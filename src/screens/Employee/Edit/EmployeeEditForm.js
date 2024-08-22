@@ -1,10 +1,14 @@
-import { useState } from "react";
-import { TouchableOpacity, View, Text, Platform, ToastAndroid } from "react-native";
-import { Checkbox, TextInput } from "react-native-paper";
-import { storage } from "../../../Storage";
+import {useState} from "react";
+import {TouchableOpacity, View, Text, Platform, ToastAndroid} from "react-native";
+import {Checkbox, TextInput} from "react-native-paper";
+import {storage} from "../../../Storage";
 import Label from "../../../components/Label";
+import {globalStyle} from "../../../globalStyle";
 
-export default function EmployeeEditForm({ employee, navigation, hideModal = () => {} }) {
+export default function EmployeeEditForm({
+                                             employee, navigation, hideModal = () => {
+    }
+                                         }) {
     const [name, setName] = useState(employee.name);
     const [leadership, setLeadership] = useState(employee.leadership);
     const [firstReference, setFirstReference] = useState(employee.firstReference);
@@ -52,16 +56,16 @@ export default function EmployeeEditForm({ employee, navigation, hideModal = () 
 
     return (
         <>
-            <Label label="Nome" />
+            <Label label="Nome"/>
             <TextInput
-                label="Nome"
                 value={name}
                 onChangeText={setName}
-                style={{ backgroundColor: "#3a3a40", marginBottom: 20, color: "#e5e7eb" }}
+                textColor={"#e5e7eb"}
+                style={{backgroundColor: "#3a3a40", marginBottom: 20}}
             />
 
             {/* Liderança e referências */}
-            <Label label="Liderança e referências" />
+            <Label label="Liderança e referências"/>
             <View className="flex flex-row flex-wrap mb-3">
                 {/* Liderança */}
                 <View className="w-5/12 flex flex-row items-center">
@@ -70,10 +74,11 @@ export default function EmployeeEditForm({ employee, navigation, hideModal = () 
                         onPress={() => {
                             setLeadership(!leadership);
                         }}
+                        color={globalStyle.theme.primary}
                     />
                     <Label
                         label="Liderança"
-                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
+                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
                         onPress={() => {
                             setLeadership(!leadership);
                         }}
@@ -87,10 +92,11 @@ export default function EmployeeEditForm({ employee, navigation, hideModal = () 
                         onPress={() => {
                             setFirstReference(!firstReference);
                         }}
+                        color={globalStyle.theme.primary}
                     />
                     <Label
                         label="1ª Referência"
-                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
+                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
                         onPress={() => {
                             setFirstReference(!firstReference);
                         }}
@@ -104,10 +110,11 @@ export default function EmployeeEditForm({ employee, navigation, hideModal = () 
                         onPress={() => {
                             setSecondReference(!secondReference);
                         }}
+                        color={globalStyle.theme.primary}
                     />
                     <Label
                         label="2ª Referência"
-                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
+                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
                         onPress={() => {
                             setSecondReference(!secondReference);
                         }}
@@ -116,7 +123,7 @@ export default function EmployeeEditForm({ employee, navigation, hideModal = () 
             </View>
 
             {/* Setores */}
-            <Label label="Setores" />
+            <Label label="Setores"/>
             <View className="flex flex-row flex-wrap">
                 {/* Recepção bloco C */}
                 <View className="w-5/12 flex flex-row items-center">
@@ -125,10 +132,11 @@ export default function EmployeeEditForm({ employee, navigation, hideModal = () 
                         onPress={() => {
                             setReceptionC(!receptionC);
                         }}
+                        color={globalStyle.theme.primary}
                     />
                     <Label
                         label="Recep. C"
-                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
+                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
                         onPress={() => {
                             setReceptionC(!receptionC);
                         }}
@@ -142,10 +150,11 @@ export default function EmployeeEditForm({ employee, navigation, hideModal = () 
                         onPress={() => {
                             setReceptionG(!receptionG);
                         }}
+                        color={globalStyle.theme.primary}
                     />
                     <Label
                         label="Recep. G"
-                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
+                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
                         onPress={() => {
                             setReceptionG(!receptionG);
                         }}
@@ -159,10 +168,11 @@ export default function EmployeeEditForm({ employee, navigation, hideModal = () 
                         onPress={() => {
                             setMedicalSupport(!medicalSupport);
                         }}
+                        color={globalStyle.theme.primary}
                     />
                     <Label
                         label="Apoio"
-                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
+                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
                         onPress={() => {
                             setMedicalSupport(!medicalSupport);
                         }}
@@ -176,10 +186,11 @@ export default function EmployeeEditForm({ employee, navigation, hideModal = () 
                         onPress={() => {
                             setObservation(!observation);
                         }}
+                        color={globalStyle.theme.primary}
                     />
                     <Label
                         label="Observação"
-                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
+                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
                         onPress={() => {
                             setObservation(!observation);
                         }}
@@ -193,10 +204,11 @@ export default function EmployeeEditForm({ employee, navigation, hideModal = () 
                         onPress={() => {
                             setFastCLM(!fastCLM);
                         }}
+                        color={globalStyle.theme.primary}
                     />
                     <Label
                         label="Fast CLM"
-                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
+                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
                         onPress={() => {
                             setFastCLM(!fastCLM);
                         }}
@@ -210,10 +222,11 @@ export default function EmployeeEditForm({ employee, navigation, hideModal = () 
                         onPress={() => {
                             setFastCollect(!fastCollect);
                         }}
+                        color={globalStyle.theme.primary}
                     />
                     <Label
                         label="Fast Coleta"
-                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
+                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
                         onPress={() => {
                             setFastCollect(!fastCollect);
                         }}
@@ -227,10 +240,11 @@ export default function EmployeeEditForm({ employee, navigation, hideModal = () 
                         onPress={() => {
                             setFastMedication(!fastMedication);
                         }}
+                        color={globalStyle.theme.primary}
                     />
                     <Label
                         label="Fast Med."
-                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
+                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
                         onPress={() => {
                             setFastMedication(!fastMedication);
                         }}
@@ -244,10 +258,11 @@ export default function EmployeeEditForm({ employee, navigation, hideModal = () 
                         onPress={() => {
                             setConcierge(!concierge);
                         }}
+                        color={globalStyle.theme.primary}
                     />
                     <Label
                         label="Concierge"
-                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
+                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
                         onPress={() => {
                             setConcierge(!concierge);
                         }}
@@ -262,6 +277,15 @@ export default function EmployeeEditForm({ employee, navigation, hideModal = () 
                 onPress={saveEmployee}
             >
                 <Text className="text-gray-200 text-center text-lg">Salvar</Text>
+            </TouchableOpacity>
+
+            {/* Botão de voltar */}
+            <TouchableOpacity
+                activeOpacity={0.78}
+                className="mt-3 w-full bg-transparent h-12 rounded-3xl flex justify-center items-center"
+                onPress={() => navigation.goBack()}
+            >
+                <Text className="text-gray-200 text-center text-lg">Voltar</Text>
             </TouchableOpacity>
         </>
     );

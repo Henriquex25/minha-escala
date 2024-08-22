@@ -213,17 +213,17 @@ export default function HomeScaleList() {
             scale
         )}\nDimensionamento ${scale.date}\n\n*${("0" + scale.receptionC.length).slice(
             -2
-        )} Func. Recepção bloco C*\n ${getEmployeesReceptionC(
+        )} Func. Recepção bloco C*${getEmployeesReceptionC(
             scale, index
         )}\n___________________\n\n*01 Func. Totem*\n*01 Func. Orientador*\n*${(
-            "0" + scale.receptionG.length
+            "0" + (scale.receptionG.length - 2)
         ).slice(
             -2
         )} Func. Recepção bloco G*\n*(equipe faz revezamento entre os locais acima)*\n ${getEmployeesReceptionG(
             scale
         )}\n___________________\n\n*${("0" + scale.medicalSupport.length).slice(
             -2
-        )} Func. Apoio Médico*\n${getEmployeesMedicalSupport(scale)}\n___________________\n\n*${(
+        )} Func. Apoio Médico*\n${getEmployeesMedicalSupport(scale)}\n___________________\n*${(
             "0" + scale.concierge.length
         ).slice(-2)} Func. Concierge*\n${getEmployeesConcierge(scale)}\n___________________\n\n*${(
             "0" + scale.fastCLM.length
@@ -231,9 +231,9 @@ export default function HomeScaleList() {
             scale
         )}\n___________________\n\n*${("0" + scale.fastCollect.length).slice(
             -2
-        )} Func. Fast Coleta*\n\n${getEmployeesFastCollect(scale)}\n___________________\n\n*${(
+        )} Func. Fast Coleta*\n\n${getEmployeesFastCollect(scale)}\n___________________\n*${(
             "0" + scale.observation.length
-        ).slice(-2)} Func. Observação*\n\n${getEmployeesObservation(
+        ).slice(-2)} Func. Observação*\n${getEmployeesObservation(
             scale
         )}\n___________________\n\n*Ausências programadas*\n\n*Folgas - ${(
             "0" + scale.daysOff.length
@@ -260,13 +260,10 @@ export default function HomeScaleList() {
         const scale = scales[index];
 
         try {
-            const result = await Share.share({
+            await Share.share({
                 message: getScaleInText(scale, index),
             });
 
-            if (result.action === Share.sharedAction) {
-                ToastAndroid.show("Compartilhado!", ToastAndroid.SHORT);
-            }
         } catch (error) {
             Alert.alert(error.message);
         }
@@ -315,7 +312,7 @@ export default function HomeScaleList() {
     const renderItem = ({item, index}) => {
         return (
             <View
-                className="bg-default-2 mt-3 rounded-lg border px-4 py-3.5"
+                className="bg-default-3 mt-3 rounded-lg border px-4 py-3.5"
                 style={{
                     borderColor: editScales[index] === true ? globalStyle.theme.primary : "#1f2937",
                 }}
@@ -328,7 +325,7 @@ export default function HomeScaleList() {
                         </View>
 
                         {/* Botões */}
-                        <View className="flex flex-row space-x-2.5 items-center -mt-2">
+                        <View className="flex flex-row space-x-3 items-center -mt-2">
                             {/* Copiar */}
                             {!editScales[index] === true && (
                                 <TouchableOpacity

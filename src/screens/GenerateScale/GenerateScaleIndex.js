@@ -44,7 +44,7 @@ export default function GenerateScaleIndex({ navigation }) {
             setShowActivityIndicator(false);
 
             if (Platform.OS === "android") {
-                ToastAndroid.show("Escala gerada com sucesso ✓", ToastAndroid.SHORT);
+                ToastAndroid.show("Escalas geradas com sucesso ✓", ToastAndroid.SHORT);
             }
         }, 0);
     }
@@ -68,11 +68,11 @@ export default function GenerateScaleIndex({ navigation }) {
             let availableEmployees = JSON.parse(storage.getString("employees") ?? "[]");
             let employeesOnLeave = availableEmployees.filter((e) =>
                 scaleGenerationData.daysOff?.some(
-                    (d) => d.employee.id === e.id && d.dates.some((dayOff) => dayOff === date)
+                    (d) => d.employee.id === e.id && d.dates?.some((dayOff) => dayOff === date)
                 )
             );
             let employeesMedicalCertificates = availableEmployees.filter((e) =>
-                scaleGenerationData.medicalCertificates.some((mc) => {
+                scaleGenerationData.medicalCertificates?.some((mc) => {
                     const dateOfTheScaleBeingGenerated = moment(date, "DD/MM/YYYY");
                     const startDate = moment(mc.startDate, "DD/MM/YYYY");
                     const endDate = moment(mc.endDate, "DD/MM/YYYY");
@@ -85,7 +85,7 @@ export default function GenerateScaleIndex({ navigation }) {
                 })
             );
             let employeesVacations = availableEmployees.filter((e) =>
-                scaleGenerationData.vacations.some((v) => {
+                scaleGenerationData.vacations?.some((v) => {
                     const dateOfTheScaleBeingGenerated = moment(date, "DD/MM/YYYY");
                     const startDate = moment(v.startDate, "DD/MM/YYYY");
                     const endDate = moment(v.endDate, "DD/MM/YYYY");

@@ -1,15 +1,15 @@
 {
   "expo": {
-    "name": "minha-escala",
+    "name": "Minha escala",
     "slug": "minha-escala",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#2a2a2e"
     },
     "ios": {
       "supportsTablet": true,
@@ -18,12 +18,17 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#2a2a2e"
       },
       "package": "com.anonymous.minhaescala"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "89e23d47-7248-4279-9ed3-8a43ea43d2b6"
+      }
     }
   }
 }

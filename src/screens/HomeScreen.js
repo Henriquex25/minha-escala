@@ -28,6 +28,7 @@ export default function HomeScreen() {
                 )
             );
         }
+        // storage.clearAll();
     }, []);
 
     return (

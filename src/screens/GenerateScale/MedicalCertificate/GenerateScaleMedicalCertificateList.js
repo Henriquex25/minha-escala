@@ -1,13 +1,17 @@
-import { useEffect, useState } from "react";
-import { View, FlatList, Text } from "react-native";
-import { Portal, Modal, Button } from "react-native-paper";
-import { storage } from "../../../Storage";
+import {useEffect, useState} from "react";
+import {View, FlatList, Text} from "react-native";
+import {Portal, Modal, Button} from "react-native-paper";
+import {storage} from "../../../Storage";
 import moment from "moment";
 import Title from "../../../components/layout/Title";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import {TouchableOpacity} from "react-native-gesture-handler";
 import Dialog from "../../../components/Dialog";
 
-export default function GenerateScaleMedicalCertificateList({ visible = false, hideModal = () => {}, navigation = () => {} }) {
+export default function GenerateScaleMedicalCertificateList({
+                                                                visible = false, hideModal = () => {
+    }, navigation = () => {
+    }
+                                                            }) {
     const [medicalCertificates, setMedicalCertificates] = useState([]);
     const [showingDeleteDialog, setShowingDeleteDialog] = useState(false);
     const [employeeIdToDelete, setEmployeeIdToDelete] = useState(0);
@@ -58,9 +62,9 @@ export default function GenerateScaleMedicalCertificateList({ visible = false, h
                 visible={visible}
                 onDismiss={hideModal}
                 className="px-2"
-                contentContainerStyle={{ backgroundColor: "#2a2a2e", padding: 20, borderRadius: 9 }}
+                contentContainerStyle={{backgroundColor: "#2a2a2e", padding: 20, borderRadius: 9}}
             >
-                <Title title="Atestados" className="text-gray-400 mt-0" />
+                <Title title="Atestados" className="text-gray-400 mt-0"/>
 
                 <Button mode="elevated" onPress={() => navigation.navigate("MedicalCertificatesCreate")} className="mb-2">
                     Adicionar
@@ -70,7 +74,7 @@ export default function GenerateScaleMedicalCertificateList({ visible = false, h
                     <View>
                         <FlatList
                             data={medicalCertificates}
-                            renderItem={({ item }) => (
+                            renderItem={({item}) => (
                                 <TouchableOpacity
                                     className="bg-default-3 pl-2.5 py-2 rounded-lg mb-2 whitespace-wrap text-wrap"
                                     activeOpacity={0.78}
@@ -96,6 +100,14 @@ export default function GenerateScaleMedicalCertificateList({ visible = false, h
                 ) : (
                     <Text className="text-gray-500 text-center">Nenhuma atestado adicionada</Text>
                 )}
+
+                <TouchableOpacity
+                    activeOpacity={0.78}
+                    className="self-end px-3 py-2 mt-5"
+                    onPress={hideModal}
+                >
+                    <Text className="text-gray-400">FECHAR</Text>
+                </TouchableOpacity>
             </Modal>
         </Portal>
     );
