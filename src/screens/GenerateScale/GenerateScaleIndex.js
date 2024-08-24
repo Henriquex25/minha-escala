@@ -543,13 +543,22 @@ export default function GenerateScaleIndex({ navigation }) {
                 {/* Dê */}
                 <View className="mb-4">
                     <Label label="Dê" />
-                    <DateTimeInput value={startDate} onValueChange={setStartDate} />
+                    <DateTimeInput
+                        date={startDate}
+                        setDate={setStartDate}
+                        minimumDate={new Date()}
+                        onValueChange={(value, event) => {
+                            if (moment(value).isAfter(endDate)) {
+                                setEndDate(value);
+                            }
+                        }}
+                    />
                 </View>
 
                 {/* Até */}
                 <View className="mb-4">
                     <Label label="Até" />
-                    <DateTimeInput value={endDate} onValueChange={setEndDate} />
+                    <DateTimeInput date={endDate} setDate={setEndDate} minimumDate={startDate} />
                 </View>
 
                 {/* Dias */}

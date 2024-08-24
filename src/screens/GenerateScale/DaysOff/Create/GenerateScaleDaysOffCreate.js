@@ -1,12 +1,12 @@
-import {useState, useEffect} from "react";
-import {View, Text, FlatList, TouchableOpacity} from "react-native";
-import {Button, Divider, Searchbar, Menu, PaperProvider} from "react-native-paper";
-import {storage} from "../../../../Storage";
+import { useState, useEffect } from "react";
+import { View, Text, FlatList, TouchableOpacity } from "react-native";
+import { Button, Divider, Searchbar, PaperProvider } from "react-native-paper";
+import { storage } from "../../../../Storage";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import moment from "moment";
 import Dialog from "../../../../components/Dialog";
 
-export default function GenerateScaleDaysOffCreate({navigation}) {
+export default function GenerateScaleDaysOffCreate({ navigation }) {
     const [searchQuery, setSearchQuery] = useState("");
     const [employees, setEmployees] = useState([]);
     const [employeesFound, setEmployeesFound] = useState([]);
@@ -15,6 +15,14 @@ export default function GenerateScaleDaysOffCreate({navigation}) {
     const [daysOffSelected, setDaysOffSelected] = useState([]);
     const [showingDeleteDialog, setShowingDeleteDialog] = useState(false);
     const [dayOffToBeRemoved, setDayOffToBeRemoved] = useState(null);
+
+    function fetchEmployees() {
+        const storedEmployees = storage.getString("employees");
+
+        setEmployees(storedEmployees ? JSON.parse(storedEmployees) : []);
+    }
+
+    useEffect(() => fetchEmployees(), []);
 
     function getGenerateScale() {
         const existingGenerateScales = storage.getString("generate-scales");
@@ -36,7 +44,11 @@ export default function GenerateScaleDaysOffCreate({navigation}) {
 
     function getIndexIfEmployeeAlreadyHasPreSelectedDaysOff(employeeId = null) {
         const generateScales = getGenerateScale();
-        return generateScales.daysOff?.findIndex((d) => d.employee.id === (employeeId ? employeeId : employeeSelectedToAddDaysOff.id)) ?? -1;
+        return (
+            generateScales.daysOff?.findIndex(
+                (d) => d.employee.id === (employeeId ? employeeId : employeeSelectedToAddDaysOff.id)
+            ) ?? -1
+        );
     }
 
     function setDayOff(event, selectedDate) {
@@ -98,14 +110,6 @@ export default function GenerateScaleDaysOffCreate({navigation}) {
         setShowingDeleteDialog(false);
     }
 
-    function fetchEmployees() {
-        const storedEmployees = storage.getString("employees");
-
-        setEmployees(storedEmployees ? JSON.parse(storedEmployees) : []);
-    }
-
-    useEffect(() => fetchEmployees(), []);
-
     return (
         <PaperProvider>
             <View className="px-5 mt-3">
@@ -115,20 +119,27 @@ export default function GenerateScaleDaysOffCreate({navigation}) {
                         <Searchbar
                             placeholder="Pesquisar funcionário"
                             className="mt-3 bg-default-3 text-gray-200 mb-3"
-                            inputStyle={{color: "#e5e7eb"}}
+                            inputStyle={{ color: "#e5e7eb" }}
                             iconColor="#0ea5e9"
                             placeholderTextColor={"#9ca3af"}
                             value={searchQuery}
                             onChangeText={(query) => {
                                 setSearchQuery(query);
-                                setEmployeesFound(employees.filter((employee) => employee.name.toLowerCase().trim().includes(query.toLowerCase().trim())));
+                                setEmployeesFound(
+                                    employees.filter((employee) =>
+                                        employee.name
+                                            .toLowerCase()
+                                            .trim()
+                                            .includes(query.toLowerCase().trim())
+                                    )
+                                );
                             }}
                         />
 
                         {employeesFound.length > 0 ? (
                             <FlatList
                                 data={employeesFound}
-                                renderItem={({item}) => (
+                                renderItem={({ item }) => (
                                     <View className="flex flex-row items-center justify-center px-2.5 mb-2">
                                         <Button
                                             mode="elevated"
@@ -136,7 +147,9 @@ export default function GenerateScaleDaysOffCreate({navigation}) {
                                             className="w-full bg-default-2"
                                             onPress={() => {
                                                 setEmployeeSelectedToAddDaysOff(item);
-                                                getDaysOffIfTheEmployeeAlreadyHasPreviousDaysOffPreSelected(item.id);
+                                                getDaysOffIfTheEmployeeAlreadyHasPreviousDaysOffPreSelected(
+                                                    item.id
+                                                );
                                                 setSearchQuery("");
                                                 setEmployeesFound([]);
                                             }}
@@ -149,7 +162,9 @@ export default function GenerateScaleDaysOffCreate({navigation}) {
                             />
                         ) : (
                             <View className="flex flex-row items-center bg-default-1 mx-2.5 px-3 py-2 rounded-lg mb-2">
-                                <Text className="w-full text-gray-400 truncate text-center">Nenhum resultado encontrado</Text>
+                                <Text className="w-full text-gray-400 truncate text-center">
+                                    Nenhum resultado encontrado
+                                </Text>
                             </View>
                         )}
                     </View>
@@ -157,27 +172,41 @@ export default function GenerateScaleDaysOffCreate({navigation}) {
                     <View>
                         {/* Funcionário selecionado */}
                         <View className="relative">
-                            <Text
-                                className="text-primary-400 font-semibold text-lg text-center">{employeeSelectedToAddDaysOff.name}</Text>
+                            <Text className="text-primary-400 font-semibold text-lg text-center">
+                                {employeeSelectedToAddDaysOff.name}
+                            </Text>
                         </View>
 
-                        <Divider className="my-6 bg-primary-500/40"/>
+                        <Divider className="my-6 bg-primary-500/40" />
 
                         {/* Dias */}
                         <View>
-                            <TouchableOpacity className="w-full" activeOpacity={0.78} onPress={() => setShowingDate(true)}>
-                                <Text className="text-center text-primary-500 font-semibold mb-6">ESCOLHER DATA</Text>
+                            <TouchableOpacity
+                                className="w-full"
+                                activeOpacity={0.78}
+                                onPress={() => setShowingDate(true)}
+                            >
+                                <Text className="text-center text-primary-500 font-semibold mb-6">
+                                    ESCOLHER DATA
+                                </Text>
                             </TouchableOpacity>
                         </View>
 
-                        {showingDate && <DateTimePicker value={new Date()} mode="date" onChange={setDayOff}/>}
+                        {showingDate && (
+                            <DateTimePicker
+                                value={new Date()}
+                                mode="date"
+                                onChange={setDayOff}
+                                minimumDate={new Date()}
+                            />
+                        )}
 
                         {/* Lista de folgas escolhidas */}
                         {daysOffSelected.length > 0 && (
                             <View>
                                 <FlatList
                                     data={daysOffSelected}
-                                    renderItem={({item}) => (
+                                    renderItem={({ item }) => (
                                         <View>
                                             <TouchableOpacity
                                                 className="bg-default-2 mb-2 py-2.5 rounded-lg"
@@ -196,7 +225,12 @@ export default function GenerateScaleDaysOffCreate({navigation}) {
                                 />
 
                                 {/* Botão de salvar */}
-                                <Button className="mt-6 bg-primary-500" mode="elevated" onPress={saveDaysOff} textColor="black">
+                                <Button
+                                    className="mt-6 bg-primary-500"
+                                    mode="elevated"
+                                    onPress={saveDaysOff}
+                                    textColor="black"
+                                >
                                     Salvar
                                 </Button>
 
@@ -206,7 +240,6 @@ export default function GenerateScaleDaysOffCreate({navigation}) {
                                     hideDialog={() => setShowingDeleteDialog(false)}
                                     onConfirm={removeDayOff}
                                     message="Tem certeza que deseja excluir esta folga?"
-
                                 />
                             </View>
                         )}

@@ -1,12 +1,12 @@
-import {useState, useEffect} from "react";
-import {View, Text, FlatList} from "react-native";
-import {Button, Divider, Searchbar, PaperProvider} from "react-native-paper";
-import {storage} from "../../../../Storage";
+import { useState, useEffect } from "react";
+import { View, Text, FlatList } from "react-native";
+import { Button, Divider, Searchbar, PaperProvider } from "react-native-paper";
+import { storage } from "../../../../Storage";
 import DateTimeInput from "../../../../components/form/DateTimeInput";
 import Label from "../../../../components/Label";
 import moment from "moment";
 
-export default function GenerateScaleVacationCreate({navigation}) {
+export default function GenerateScaleVacationCreate({ navigation }) {
     const [searchQuery, setSearchQuery] = useState("");
     const [employees, setEmployees] = useState([]);
     const [employeesFound, setEmployeesFound] = useState([]);
@@ -32,7 +32,12 @@ export default function GenerateScaleVacationCreate({navigation}) {
 
     function getIndexIfEmployeeAlreadyHasPreSelectedVacation(employeeId = null) {
         const generateScales = getGenerateScale();
-        return generateScales.vacations?.findIndex((d) => d.employee.id === (employeeId ? employeeId : employeeSelectedToAddVacation.id)) ?? -1;
+        return (
+            generateScales.vacations?.findIndex(
+                (d) =>
+                    d.employee.id === (employeeId ? employeeId : employeeSelectedToAddVacation.id)
+            ) ?? -1
+        );
     }
 
     function saveVacationToGenerateScale() {
@@ -87,20 +92,27 @@ export default function GenerateScaleVacationCreate({navigation}) {
                         <Searchbar
                             placeholder="Pesquisar funcionário"
                             className="mt-3 bg-default-3 text-gray-200 mb-3"
-                            inputStyle={{color: "#e5e7eb"}}
+                            inputStyle={{ color: "#e5e7eb" }}
                             iconColor="#0ea5e9"
                             placeholderTextColor={"#9ca3af"}
                             value={searchQuery}
                             onChangeText={(query) => {
                                 setSearchQuery(query);
-                                setEmployeesFound(employees.filter((employee) => employee.name.toLowerCase().trim().includes(query.toLowerCase().trim())));
+                                setEmployeesFound(
+                                    employees.filter((employee) =>
+                                        employee.name
+                                            .toLowerCase()
+                                            .trim()
+                                            .includes(query.toLowerCase().trim())
+                                    )
+                                );
                             }}
                         />
 
                         {employeesFound.length > 0 ? (
                             <FlatList
                                 data={employeesFound}
-                                renderItem={({item}) => (
+                                renderItem={({ item }) => (
                                     <View className="flex flex-row items-center justify-center px-2.5 mb-2">
                                         <Button
                                             mode="elevated"
@@ -108,7 +120,9 @@ export default function GenerateScaleVacationCreate({navigation}) {
                                             className="w-full bg-default-2"
                                             onPress={() => {
                                                 setEmployeeSelectedToAddVacation(item);
-                                                getVacationStartDateIfThereIsPreviousPreSelectedVacation(item.id);
+                                                getVacationStartDateIfThereIsPreviousPreSelectedVacation(
+                                                    item.id
+                                                );
                                                 setSearchQuery("");
                                                 setEmployeesFound([]);
                                             }}
@@ -121,7 +135,9 @@ export default function GenerateScaleVacationCreate({navigation}) {
                             />
                         ) : (
                             <View className="flex flex-row items-center bg-default-1 mx-2.5 px-3 py-2 rounded-lg mb-2">
-                                <Text className="w-full text-gray-400 truncate text-center">Nenhum resultado encontrado</Text>
+                                <Text className="w-full text-gray-400 truncate text-center">
+                                    Nenhum resultado encontrado
+                                </Text>
                             </View>
                         )}
                     </View>
@@ -129,30 +145,48 @@ export default function GenerateScaleVacationCreate({navigation}) {
                     <View>
                         {/* Funcionário selecionado */}
                         <View className="relative">
-                            <Text
-                                className="text-primary-400 font-semibold text-lg text-center">{employeeSelectedToAddVacation.name}</Text>
+                            <Text className="text-primary-400 font-semibold text-lg text-center">
+                                {employeeSelectedToAddVacation.name}
+                            </Text>
                         </View>
 
-                        <Divider className="my-6 bg-primary-500/40"/>
+                        <Divider className="my-6 bg-primary-500/40" />
 
                         {/* Escolher Dias */}
                         <View>
                             {/* Data inicial */}
                             <View>
-                                <Label label="Início"/>
-                                <DateTimeInput value={startDate} onValueChange={(value) => setStartDate(value)}/>
+                                <Label label="Início" />
+                                <DateTimeInput
+                                    date={startDate}
+                                    setDate={setStartDate}
+                                    onValueChange={(value, event) => {
+                                        if (moment(value).isAfter(endDate)) {
+                                            setEndDate(value);
+                                        }
+                                    }}
+                                    minimumDate={new Date()}
+                                />
                             </View>
 
                             {/* Data final */}
                             <View className="mt-5">
-                                <Label label="Fim"/>
-                                <DateTimeInput value={endDate} onValueChange={(value) => setEndDate(value)}/>
+                                <Label label="Fim" />
+                                <DateTimeInput
+                                    date={endDate}
+                                    setDate={setEndDate}
+                                    minimumDate={startDate}
+                                />
                             </View>
                         </View>
 
                         {/* Botão de salvar */}
-                        <Button className="mt-7 bg-primary-500" mode="elevated" onPress={saveVacationToGenerateScale}
-                                textColor="black">
+                        <Button
+                            className="mt-7 bg-primary-500"
+                            mode="elevated"
+                            onPress={saveVacationToGenerateScale}
+                            textColor="black"
+                        >
                             Salvar
                         </Button>
                     </View>
