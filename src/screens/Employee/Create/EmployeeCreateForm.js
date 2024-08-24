@@ -1,25 +1,37 @@
-import {useState} from "react";
-import {TouchableOpacity, View, Text, Platform, ToastAndroid} from "react-native";
-import {Checkbox, TextInput} from "react-native-paper";
-import {storage, allSectors} from "../../../Storage";
+import { useState } from "react";
+import { TouchableOpacity, View, Text, Platform, ToastAndroid, Alert } from "react-native";
+import { Checkbox, TextInput } from "react-native-paper";
+import { storage, allSectors } from "../../../Storage";
 import Label from "../../../components/Label";
-import {globalStyle} from "../../../globalStyle";
+import { globalStyle } from "../../../globalStyle";
+import validator from "validator";
 
-export default function SectorCreateForm({
-                                             hideModal = () => {
-                                             }
-                                         }) {
+export default function SectorCreateForm({ hideModal = () => {} }) {
     const [name, setName] = useState("");
+    const [nameValidationError, setNameValidationError] = useState({
+        hasError: false,
+        message: "",
+    });
     const [leadership, setLeadership] = useState(false);
     const [firstReference, setFirstReference] = useState(false);
     const [secondReference, setSecondReference] = useState(false);
     const [sectors, setSectors] = useState(
         allSectors.map((s) => {
-            return {[s.id]: false};
+            return { [s.id]: false };
         })
     );
 
     function saveEmployee() {
+        if (!validateName()) {
+            Alert.alert(
+                "Erro",
+                nameValidationError.message
+                    ? nameValidationError.message
+                    : "Preencha os campos corretamente."
+            );
+            return;
+        }
+
         const existingEmployees = storage.getString("employees");
         let employees = existingEmployees ? JSON.parse(existingEmployees) : [];
         const lastItem = employees.slice(-1);
@@ -43,21 +55,54 @@ export default function SectorCreateForm({
         hideModal();
     }
 
+    function validateName() {
+        if (validator.isEmpty(name)) {
+            setNameValidationError({ hasError: true, message: 'O campo "Nome" é obrigatório' });
+            return false;
+        }
+
+        if (name.length < 3) {
+            setNameValidationError({
+                hasError: true,
+                message: 'O campo "Nome" deve conter pelo menos 3 caracteres.',
+            });
+            return false;
+        }
+
+        if (name.length > 30) {
+            setNameValidationError({
+                hasError: true,
+                message: 'O campo "Nome" deve conter no máximo 30 caracteres.',
+            });
+            return false;
+        }
+
+        setNameValidationError({ hasError: false, message: "" });
+        return true;
+    }
+
     return (
         <>
-            <Label label="Nome"/>
-            <TextInput
-                label="Nome"
-                onChangeText={setName}
-                style={{backgroundColor: "#3a3a40", marginBottom: 20}}
-                textColor={"#e5e7eb"}
-                underlineColor="#38bdf8"
-                activeUnderlineColor="#0369a1"
-
-            />
+            <Label label="Nome" />
+            <View style={{ marginBottom: 20 }}>
+                <TextInput
+                    label="Nome"
+                    onChangeText={setName}
+                    style={{
+                        backgroundColor: "#3a3a40",
+                    }}
+                    textColor={"#e5e7eb"}
+                    underlineColor={nameValidationError.hasError ? "red" : "#38bdf8"}
+                    activeUnderlineColor={nameValidationError.hasError ? "red" : "#0369a1"}
+                    onBlur={validateName}
+                />
+                {nameValidationError.hasError && (
+                    <Text className="mt-1 text-red-500">{nameValidationError.message}</Text>
+                )}
+            </View>
 
             {/* Liderança e referências */}
-            <Label label="Liderança e referências"/>
+            <Label label="Liderança e referências" />
             <View className="flex flex-row flex-wrap mb-3">
                 {/* Liderança */}
                 <View className="w-5/12 flex flex-row items-center">
@@ -70,7 +115,7 @@ export default function SectorCreateForm({
                     />
                     <Label
                         label="Liderança"
-                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
+                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
                         onPress={() => {
                             setLeadership(!leadership);
                         }}
@@ -88,7 +133,7 @@ export default function SectorCreateForm({
                     />
                     <Label
                         label="1ª Referência"
-                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
+                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
                         onPress={() => {
                             setFirstReference(!firstReference);
                         }}
@@ -106,7 +151,7 @@ export default function SectorCreateForm({
                     />
                     <Label
                         label="2ª Referência"
-                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
+                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
                         onPress={() => {
                             setSecondReference(!secondReference);
                         }}
@@ -115,20 +160,20 @@ export default function SectorCreateForm({
             </View>
 
             {/* Setores */}
-            <Label label="Setores"/>
+            <Label label="Setores" />
             <View className="flex flex-row flex-wrap">
                 {/* Recepção bloco C */}
                 <View className="w-5/12 flex flex-row items-center">
                     <Checkbox
                         status={sectors.receptionC ? "checked" : "unchecked"}
                         onPress={() => {
-                            setSectors({...sectors, receptionC: !sectors.receptionC});
+                            setSectors({ ...sectors, receptionC: !sectors.receptionC });
                         }}
                         color={globalStyle.theme.primary}
                     />
                     <Label
                         label="Recep. C"
-                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
+                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
                         onPress={() => {
                             setSectors({
                                 ...sectors,
@@ -152,7 +197,7 @@ export default function SectorCreateForm({
                     />
                     <Label
                         label="Recep. G"
-                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
+                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
                         onPress={() => {
                             setSectors({
                                 ...sectors,
@@ -176,7 +221,7 @@ export default function SectorCreateForm({
                     />
                     <Label
                         label="Apoio"
-                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
+                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
                         onPress={() => {
                             setSectors({
                                 ...sectors,
@@ -200,7 +245,7 @@ export default function SectorCreateForm({
                     />
                     <Label
                         label="Observação"
-                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
+                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
                         onPress={() => {
                             setSectors({
                                 ...sectors,
@@ -224,7 +269,7 @@ export default function SectorCreateForm({
                     />
                     <Label
                         label="Fast CLM"
-                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
+                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
                         onPress={() => {
                             setSectors({
                                 ...sectors,
@@ -248,7 +293,7 @@ export default function SectorCreateForm({
                     />
                     <Label
                         label="Fast Coleta"
-                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
+                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
                         onPress={() => {
                             setSectors({
                                 ...sectors,
@@ -272,7 +317,7 @@ export default function SectorCreateForm({
                     />
                     <Label
                         label="Fast Med."
-                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
+                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
                         onPress={() => {
                             setSectors({
                                 ...sectors,
@@ -296,7 +341,7 @@ export default function SectorCreateForm({
                     />
                     <Label
                         label="Concierge"
-                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
+                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
                         onPress={() => {
                             setSectors({
                                 ...sectors,

@@ -1,15 +1,17 @@
-import {useState} from "react";
-import {TouchableOpacity, View, Text, Platform, ToastAndroid} from "react-native";
-import {Checkbox, TextInput} from "react-native-paper";
-import {storage} from "../../../Storage";
+import { useState } from "react";
+import { TouchableOpacity, View, Text, Platform, ToastAndroid, Alert } from "react-native";
+import { Checkbox, TextInput } from "react-native-paper";
+import { storage } from "../../../Storage";
 import Label from "../../../components/Label";
-import {globalStyle} from "../../../globalStyle";
+import { globalStyle } from "../../../globalStyle";
+import validator from "validator";
 
-export default function EmployeeEditForm({
-                                             employee, navigation, hideModal = () => {
-    }
-                                         }) {
+export default function EmployeeEditForm({ employee, navigation, hideModal = () => {} }) {
     const [name, setName] = useState(employee.name);
+    const [nameValidationError, setNameValidationError] = useState({
+        hasError: false,
+        message: "",
+    });
     const [leadership, setLeadership] = useState(employee.leadership);
     const [firstReference, setFirstReference] = useState(employee.firstReference);
     const [secondReference, setSecondReference] = useState(employee.secondReference);
@@ -23,6 +25,16 @@ export default function EmployeeEditForm({
     const [concierge, setConcierge] = useState(employee.sectors.concierge);
 
     function saveEmployee() {
+        if (!validateName()) {
+            Alert.alert(
+                "Erro",
+                nameValidationError.message
+                    ? nameValidationError.message
+                    : "Preencha os campos corretamente."
+            );
+            return;
+        }
+
         const employees = JSON.parse(storage.getString("employees"));
         const employeeIndex = employees.findIndex((e) => e.id === employee.id);
         const newEmployeeData = {
@@ -54,18 +66,53 @@ export default function EmployeeEditForm({
         navigation.goBack();
     }
 
+    function validateName() {
+        if (validator.isEmpty(name)) {
+            setNameValidationError({ hasError: true, message: 'O campo "Nome" é obrigatório' });
+            return false;
+        }
+
+        if (name.length < 3) {
+            setNameValidationError({
+                hasError: true,
+                message: 'O campo "Nome" deve conter pelo menos 3 caracteres.',
+            });
+            return false;
+        }
+
+        if (name.length > 30) {
+            setNameValidationError({
+                hasError: true,
+                message: 'O campo "Nome" deve conter no máximo 30 caracteres.',
+            });
+            return false;
+        }
+
+        setNameValidationError({ hasError: false, message: "" });
+        return true;
+    }
+
     return (
         <>
-            <Label label="Nome"/>
-            <TextInput
-                value={name}
-                onChangeText={setName}
-                textColor={"#e5e7eb"}
-                style={{backgroundColor: "#3a3a40", marginBottom: 20}}
-            />
+            <Label label="Nome" />
+            <View style={{ marginBottom: 20 }}>
+                <TextInput
+                    value={name}
+                    onChangeText={setName}
+                    style={{ backgroundColor: "#3a3a40" }}
+                    textColor={"#e5e7eb"}
+                    underlineColor={nameValidationError.hasError ? "red" : "#38bdf8"}
+                    activeUnderlineColor={nameValidationError.hasError ? "red" : "#0369a1"}
+                    onBlur={validateName}
+                />
+
+                {nameValidationError.hasError && (
+                    <Text className="mt-1 text-red-500">{nameValidationError.message}</Text>
+                )}
+            </View>
 
             {/* Liderança e referências */}
-            <Label label="Liderança e referências"/>
+            <Label label="Liderança e referências" />
             <View className="flex flex-row flex-wrap mb-3">
                 {/* Liderança */}
                 <View className="w-5/12 flex flex-row items-center">
@@ -78,7 +125,7 @@ export default function EmployeeEditForm({
                     />
                     <Label
                         label="Liderança"
-                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
+                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
                         onPress={() => {
                             setLeadership(!leadership);
                         }}
@@ -96,7 +143,7 @@ export default function EmployeeEditForm({
                     />
                     <Label
                         label="1ª Referência"
-                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
+                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
                         onPress={() => {
                             setFirstReference(!firstReference);
                         }}
@@ -114,7 +161,7 @@ export default function EmployeeEditForm({
                     />
                     <Label
                         label="2ª Referência"
-                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
+                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
                         onPress={() => {
                             setSecondReference(!secondReference);
                         }}
@@ -123,7 +170,7 @@ export default function EmployeeEditForm({
             </View>
 
             {/* Setores */}
-            <Label label="Setores"/>
+            <Label label="Setores" />
             <View className="flex flex-row flex-wrap">
                 {/* Recepção bloco C */}
                 <View className="w-5/12 flex flex-row items-center">
@@ -136,7 +183,7 @@ export default function EmployeeEditForm({
                     />
                     <Label
                         label="Recep. C"
-                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
+                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
                         onPress={() => {
                             setReceptionC(!receptionC);
                         }}
@@ -154,7 +201,7 @@ export default function EmployeeEditForm({
                     />
                     <Label
                         label="Recep. G"
-                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
+                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
                         onPress={() => {
                             setReceptionG(!receptionG);
                         }}
@@ -172,7 +219,7 @@ export default function EmployeeEditForm({
                     />
                     <Label
                         label="Apoio"
-                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
+                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
                         onPress={() => {
                             setMedicalSupport(!medicalSupport);
                         }}
@@ -190,7 +237,7 @@ export default function EmployeeEditForm({
                     />
                     <Label
                         label="Observação"
-                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
+                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
                         onPress={() => {
                             setObservation(!observation);
                         }}
@@ -208,7 +255,7 @@ export default function EmployeeEditForm({
                     />
                     <Label
                         label="Fast CLM"
-                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
+                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
                         onPress={() => {
                             setFastCLM(!fastCLM);
                         }}
@@ -226,7 +273,7 @@ export default function EmployeeEditForm({
                     />
                     <Label
                         label="Fast Coleta"
-                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
+                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
                         onPress={() => {
                             setFastCollect(!fastCollect);
                         }}
@@ -244,7 +291,7 @@ export default function EmployeeEditForm({
                     />
                     <Label
                         label="Fast Med."
-                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
+                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
                         onPress={() => {
                             setFastMedication(!fastMedication);
                         }}
@@ -262,7 +309,7 @@ export default function EmployeeEditForm({
                     />
                     <Label
                         label="Concierge"
-                        style={{color: "#9ca3af", paddingLeft: 0, paddingRight: 0}}
+                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
                         onPress={() => {
                             setConcierge(!concierge);
                         }}
