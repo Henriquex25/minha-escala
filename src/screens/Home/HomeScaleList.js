@@ -65,12 +65,9 @@ export default function HomeScaleList() {
         const employees = scale.receptionC;
         const time = "🍝 22:50 às 23:10 / 🛏 04:00 às 05:00";
         let value = "";
-        let firstItem = true;
 
-        employees?.forEach((employee) => {
-            value += `${firstItem ? "" : "\n\n"}${employee.name} ${time}`;
-
-            firstItem = false;
+        employees?.forEach((employee, index) => {
+            value += `${index === 0 ? "" : "\n\n"}${employee.name} ${time}`;
         });
 
         return value ? value : "--";
@@ -80,15 +77,12 @@ export default function HomeScaleList() {
         const employees = item.receptionG;
         const times = getTimesReceptionG(employees?.length ?? 0);
         let value = "";
-        let firstItem = true;
 
         employees?.forEach((employee, index) => {
             const i = index + (times.length - employees.length);
             const time = times[i] ?? "(Sem horário definido)";
 
-            value += `${firstItem ? "\n" : "\n\n"}${employee.name} ${time}`;
-
-            firstItem = false;
+            value += `${index === 0 ? "\n" : "\n\n"}${employee.name} ${time}`;
         });
 
         return value ? value : "--";
@@ -138,15 +132,12 @@ export default function HomeScaleList() {
         }
 
         let value = "";
-        let firstItem = true;
 
         employees?.forEach((employee, index) => {
             const i = index + (times.length - employees.length);
             const time = times[i] ?? "(Sem horário definido)";
 
-            value += `${firstItem ? "" : "\n\n"}${employee.name} ${time}`;
-
-            firstItem = false;
+            value += `${index === 0 ? "" : "\n\n"}${employee.name} ${time}`;
         });
 
         return value ? value : "--";
@@ -156,12 +147,9 @@ export default function HomeScaleList() {
         const employees = item.concierge;
         const time = "🍝 21:00 às 21:20 / 🛏 05:00 às 06:00";
         let value = "";
-        let firstItem = true;
 
-        employees?.forEach((employee) => {
-            value += `${firstItem ? "" : "\n\n"}${employee.name} ${time}`;
-
-            firstItem = false;
+        employees?.forEach((employee, index) => {
+            value += `${index === 0 ? "" : "\n\n"}${employee.name} ${time}`;
         });
 
         return value ? value : "--";
@@ -171,12 +159,9 @@ export default function HomeScaleList() {
         const employees = item.fastCLM;
         const time = "🍝 21:20 às 21:40 / 🛏 03:00 às 04:00";
         let value = "";
-        let firstItem = true;
 
-        employees?.forEach((employee) => {
-            value += `${firstItem ? "" : "\n\n"}${employee.name} ${time}`;
-
-            firstItem = false;
+        employees?.forEach((employee, index) => {
+            value += `${index === 0 ? "" : "\n\n"}${employee.name} ${time}`;
         });
 
         return value ? value : "--";
@@ -186,12 +171,8 @@ export default function HomeScaleList() {
         const employees = item.fastCollect;
         const time = "🍝 21:40 às 22:00 / 🛏 02:00 às 03:00";
         let value = "";
-        let firstItem = true;
-
-        employees?.forEach((employee) => {
-            value += `${firstItem ? "" : "\n\n"}${employee.name} ${time}`;
-
-            firstItem = false;
+        employees?.forEach((employee, index) => {
+            value += `${index === 0 ? "" : "\n\n"}${employee.name} ${time}`;
         });
 
         return value ? value : "--";
@@ -201,12 +182,9 @@ export default function HomeScaleList() {
         const employees = item.observation;
         const time = "🍝 22:00 às 22:20 / 🛏 02:00 às 03:00";
         let value = "";
-        let firstItem = true;
 
-        employees?.forEach((employee) => {
-            value += `${firstItem ? "" : "\n\n"}${employee.name} ${time}`;
-
-            firstItem = false;
+        employees?.forEach((employee, index) => {
+            value += `${index === 0 ? "" : "\n\n"}${employee.name} ${time}`;
         });
 
         return value ? value : "--";
@@ -250,7 +228,7 @@ export default function HomeScaleList() {
             scale.date
         }\n\n*${("0" + scale.receptionC.length).slice(
             -2
-        )} Func. Recepção bloco C*${getEmployeesReceptionC(
+        )} Func. Recepção bloco C*\n${getEmployeesReceptionC(
             scale,
             index
         )}\n___________________\n\n*01 Func. Totem*\n*01 Func. Orientador*\n*${(
@@ -262,7 +240,7 @@ export default function HomeScaleList() {
             scale
         )}\n___________________\n\n*${("0" + scale.medicalSupport.length).slice(
             -2
-        )} Func. Apoio Médico*${getEmployeesMedicalSupport(scale)}\n___________________\n\n*${(
+        )} Func. Apoio Médico*\n${getEmployeesMedicalSupport(scale)}\n___________________\n\n*${(
             "0" + scale.concierge.length
         ).slice(-2)} Func. Concierge*\n${getEmployeesConcierge(scale)}\n___________________\n\n*${(
             "0" + scale.fastCLM.length

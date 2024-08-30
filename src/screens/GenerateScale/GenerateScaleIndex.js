@@ -332,7 +332,7 @@ export default function GenerateScaleIndex({ navigation }) {
         }
 
         const preferredEmployeeForSector = scale.availableEmployees.find(
-            (e) => e.name.toLowerCase().trim() === "Thatianny"
+            (e) => e.name.toLowerCase().trim() === "Thatianny".toLowerCase().trim()
         );
 
         if (preferredEmployeeForSector) {
@@ -602,20 +602,22 @@ export default function GenerateScaleIndex({ navigation }) {
                 {/* Dias */}
                 <View>
                     <Label label="Dias" />
-                    <SegmentedButtons
-                        value={sequenceDays}
-                        onValueChange={setSequenceDays}
-                        buttons={[
-                            {
-                                value: "odd",
-                                label: "Ímpares",
-                            },
-                            {
-                                value: "even",
-                                label: "Pares",
-                            },
-                        ]}
-                    />
+                    <View className="px-1">
+                        <SegmentedButtons
+                            value={sequenceDays}
+                            onValueChange={setSequenceDays}
+                            buttons={[
+                                {
+                                    value: "odd",
+                                    label: "Ímpares",
+                                },
+                                {
+                                    value: "even",
+                                    label: "Pares",
+                                },
+                            ]}
+                        />
+                    </View>
                 </View>
 
                 {/* Folgas */}
