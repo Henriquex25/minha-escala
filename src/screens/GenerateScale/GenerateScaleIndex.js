@@ -26,7 +26,7 @@ export default function GenerateScaleIndex({ navigation }) {
     const scaleGenerationPopulationOrder = [
         getObservationEmployees,
         getFastCLMEmployees,
-        getFastMedicationEmployees,
+        // getFastMedicationEmployees,
         getFastCollectEmployees,
         getConciergeEmployees,
         getMedicalSupportEmployees,
@@ -258,14 +258,52 @@ export default function GenerateScaleIndex({ navigation }) {
         const sectorId = "fastCollect";
         const sectorName = "Fast coleta";
         const maxNumberEmployeesForTheSector = 1;
-        const [selectedEmployees, his] = chooseEmployee(
-            sectorId,
-            sectorName,
-            maxNumberEmployeesForTheSector,
-            scale,
-            histories,
-            date
+        let selectedEmployees = [];
+        let hist = histories;
+
+        const preferredEmployeeForSector = scale.availableEmployees.find(
+            (e) => e.name.toLowerCase().trim() === "Kaique".toLowerCase().trim()
         );
+
+        if (preferredEmployeeForSector) {
+            const sectorHistoryIndex = histories.findIndex((h) => h.id === sectorId);
+            const sectorHistory =
+                sectorHistoryIndex > -1
+                    ? histories[sectorHistoryIndex]
+                    : {
+                          id: sectorId,
+                          name: sectorName,
+                          employees: [],
+                      };
+
+            selectedEmployees = [
+                {
+                    id: preferredEmployeeForSector.id,
+                    name: preferredEmployeeForSector.name,
+                    lastDate: date,
+                },
+            ];
+
+            hist = updatePartialHistory(
+                histories,
+                sectorHistoryIndex,
+                sectorHistory,
+                preferredEmployeeForSector,
+                date
+            );
+        } else {
+            const [selEmployees, his] = chooseEmployee(
+                sectorId,
+                sectorName,
+                maxNumberEmployeesForTheSector,
+                scale,
+                histories,
+                date
+            );
+
+            selectedEmployees = selEmployees;
+            hist = his;
+        }
 
         scale[sectorId] = selectedEmployees;
 
@@ -273,7 +311,7 @@ export default function GenerateScaleIndex({ navigation }) {
             (employee) => !selectedEmployees.some((e) => e.id === employee.id)
         );
 
-        return [scale, his];
+        return [scale, hist];
     }
 
     function getConciergeEmployees(scale, date, histories) {
@@ -294,7 +332,7 @@ export default function GenerateScaleIndex({ navigation }) {
         }
 
         const preferredEmployeeForSector = scale.availableEmployees.find(
-            (e) => e.name === "Thatianny"
+            (e) => e.name.toLowerCase().trim() === "Thatianny"
         );
 
         if (preferredEmployeeForSector) {

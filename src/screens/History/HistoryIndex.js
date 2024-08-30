@@ -1,8 +1,8 @@
 import Body from "../../components/layout/Body";
 import Title from "../../components/layout/Title";
-import {GestureHandlerRootView} from "react-native-gesture-handler";
-import {useMMKVObject} from "react-native-mmkv";
-import {View, TouchableOpacity, Text, FlatList} from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { useMMKVObject } from "react-native-mmkv";
+import { View, TouchableOpacity, Text, FlatList } from "react-native";
 import DraggableFlatList, {
     ScaleDecorator,
     ShadowDecorator,
@@ -10,12 +10,12 @@ import DraggableFlatList, {
 } from "react-native-draggable-flatlist";
 import Animated from "react-native-reanimated";
 import Label from "../../components/Label";
-import {useState} from "react";
-import {allSectors} from "../../Storage";
-import {Icon, Portal, Modal} from "react-native-paper";
+import { useState } from "react";
+import { allSectors } from "../../Storage";
+import { Icon, Portal, Modal } from "react-native-paper";
 import Button from "../../components/Button";
 
-export default function HistoryIndex({navigation}) {
+export default function HistoryIndex({ navigation }) {
     const [histories, setHistories] = useMMKVObject("histories");
     const [visibleModalTransferSectorEmployee, setVisibleModalTransferSectorEmployee] =
         useState(false);
@@ -41,7 +41,7 @@ export default function HistoryIndex({navigation}) {
         setPayloadToChangeSectorEmployee({});
     }
 
-    const renderEmployee = ({item, drag, isActive, sectorIndex}) => {
+    const renderEmployee = ({ item, drag, isActive, sectorIndex }) => {
         return (
             <ScaleDecorator activeScale={1.03}>
                 <OpacityDecorator activeOpacity={0.6}>
@@ -81,7 +81,7 @@ export default function HistoryIndex({navigation}) {
                                         setVisibleModalTransferSectorEmployee(true);
                                     }}
                                 >
-                                    <Icon source="dots-vertical" color="#0ea5e9" size={20}/>
+                                    <Icon source="dots-vertical" color="#0ea5e9" size={20} />
                                 </TouchableOpacity>
                             </Animated.View>
                         </TouchableOpacity>
@@ -91,7 +91,7 @@ export default function HistoryIndex({navigation}) {
         );
     };
 
-    const renderSector = ({item}) => {
+    const renderSector = ({ item }) => {
         const sectorIndex = histories.findIndex((s) => s.id === item.id);
         const employees = sectorIndex > -1 ? histories[sectorIndex]?.employees : [];
 
@@ -100,7 +100,7 @@ export default function HistoryIndex({navigation}) {
                 <Label
                     label={item.name}
                     className="text-primary-400 font-semibold"
-                    style={{fontSize: 16}}
+                    style={{ fontSize: 16 }}
                 />
 
                 {/* <TouchableOpacity className="absolute -top-2 right-0 p-2" activeOpacity={0.78}>
@@ -109,11 +109,11 @@ export default function HistoryIndex({navigation}) {
 
                 <DraggableFlatList
                     data={employees}
-                    renderItem={({item, drag, isActive}) =>
-                        renderEmployee({item, drag, isActive, sectorIndex: sectorIndex})
+                    renderItem={({ item, drag, isActive }) =>
+                        renderEmployee({ item, drag, isActive, sectorIndex: sectorIndex })
                     }
-                    keyExtractor={(item) => item.id}
-                    onDragEnd={({data}) =>
+                    keyExtractor={(item, index) => `${item.id}-${index}`}
+                    onDragEnd={({ data }) =>
                         setHistories((prevData) => {
                             const prevHistory = prevData;
 
@@ -130,11 +130,11 @@ export default function HistoryIndex({navigation}) {
     return (
         <Body>
             <GestureHandlerRootView>
-                <Title title="Histórico"/>
+                <Title title="Histórico" />
 
                 <DraggableFlatList
                     data={allSectors}
-                    keyExtractor={(item) => item.id}
+                    keyExtractor={(item, index) => `${item.id}-${index}`}
                     renderItem={renderSector}
                     className="mb-14"
                 />
@@ -150,12 +150,12 @@ export default function HistoryIndex({navigation}) {
                             borderRadius: 9,
                         }}
                     >
-                        <Title title="Mudar para:"/>
+                        <Title title="Mudar para:" />
 
                         <FlatList
                             data={sectorsAvailableToChange}
-                            keyExtractor={(item) => item.id}
-                            renderItem={({item}) => (
+                            keyExtractor={(item, index) => `${item.id}-${index}`}
+                            renderItem={({ item }) => (
                                 <Button
                                     className="bg-default-3"
                                     onPress={() => changeSectorEmployee(item.id)}
