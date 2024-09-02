@@ -140,8 +140,11 @@ export default function HomeScreen() {
     return (
         <Body>
             <StatusBar barStyle="light-content" backgroundColor="#2a2a2e" />
+            <Text className="text-gray-400 px-2 -mt-2" style={{ textAlign: "right", fontSize: 13 }}>
+                v{nativeApplicationVersion}
+            </Text>
 
-            <View>
+            <View className="mb-4 -mt-3">
                 <HomeScaleList />
             </View>
 
