@@ -27,7 +27,7 @@ export default function GenerateScaleIndex({ navigation }) {
         getObservationEmployees,
         getFastCLMEmployees,
         // getFastMedicationEmployees,
-        getFastCollectEmployees,
+        // getFastCollectEmployees,
         getConciergeEmployees,
         getMedicalSupportEmployees,
         getReceptionCEmployees,

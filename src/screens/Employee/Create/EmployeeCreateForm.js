@@ -279,30 +279,6 @@ export default function SectorCreateForm({ hideModal = () => {} }) {
                     />
                 </View>
 
-                {/* Fast Coleta */}
-                <View className="w-5/12 flex flex-row items-center">
-                    <Checkbox
-                        status={sectors.fastCollect ? "checked" : "unchecked"}
-                        onPress={() => {
-                            setSectors({
-                                ...sectors,
-                                fastCollect: !sectors.fastCollect,
-                            });
-                        }}
-                        color={globalStyle.theme.primary}
-                    />
-                    <Label
-                        label="Fast Coleta"
-                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
-                        onPress={() => {
-                            setSectors({
-                                ...sectors,
-                                fastCollect: !sectors.fastCollect,
-                            });
-                        }}
-                    />
-                </View>
-
                 {/* Fast Medicação */}
                 <View className="w-5/12 flex flex-row items-center">
                     <Checkbox

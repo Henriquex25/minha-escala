@@ -20,7 +20,6 @@ export default function EmployeeEditForm({ employee, navigation, hideModal = () 
     const [medicalSupport, setMedicalSupport] = useState(employee.sectors.medicalSupport);
     const [observation, setObservation] = useState(employee.sectors.observation);
     const [fastCLM, setFastCLM] = useState(employee.sectors.fastCLM);
-    const [fastCollect, setFastCollect] = useState(employee.sectors.fastCollect);
     const [fastMedication, setFastMedication] = useState(employee.sectors.fastMedication);
     const [concierge, setConcierge] = useState(employee.sectors.concierge);
 
@@ -49,7 +48,6 @@ export default function EmployeeEditForm({ employee, navigation, hideModal = () 
                 medicalSupport: medicalSupport,
                 observation: observation,
                 fastCLM: fastCLM,
-                fastCollect: fastCollect,
                 fastMedication: fastMedication,
                 concierge: concierge,
             },
@@ -258,24 +256,6 @@ export default function EmployeeEditForm({ employee, navigation, hideModal = () 
                         style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
                         onPress={() => {
                             setFastCLM(!fastCLM);
-                        }}
-                    />
-                </View>
-
-                {/* Fast Coleta */}
-                <View className="w-5/12 flex flex-row items-center">
-                    <Checkbox
-                        status={fastCollect ? "checked" : "unchecked"}
-                        onPress={() => {
-                            setFastCollect(!fastCollect);
-                        }}
-                        color={globalStyle.theme.primary}
-                    />
-                    <Label
-                        label="Fast Coleta"
-                        style={{ color: "#9ca3af", paddingLeft: 0, paddingRight: 0 }}
-                        onPress={() => {
-                            setFastCollect(!fastCollect);
                         }}
                     />
                 </View>

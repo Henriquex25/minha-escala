@@ -38,7 +38,7 @@ export default function HomeScreen() {
             );
         }
 
-        checkForUpdate();
+        // checkForUpdate();
     }, []);
 
     async function checkForUpdate() {
@@ -49,7 +49,8 @@ export default function HomeScreen() {
             const data = await response.json();
 
             const latestVersion = parseInt(data.tag_name.replace(/\D/g, "")); // Tag da versão mais recente
-            const currentVersion = parseInt(nativeApplicationVersion.replace(/\D/g, "")); // Versão instalada
+            // const currentVersion = parseInt(nativeApplicationVersion.replace(/\D/g, "")); // Versão instalada
+            const currentVersion = 104;
 
             if (currentVersion < latestVersion) {
                 const apkUrl = data.assets[0].browser_download_url; // URL para baixar o APK
@@ -79,8 +80,7 @@ export default function HomeScreen() {
     }
 
     async function downloadApk(uri, version) {
-        const downloadDir = FileSystem.documentDirectory + "Download/";
-        const fileUri = downloadDir + `minha-escala-${version}.apk`;
+        const fileName = `minha-escala-${version}.apk`;
 
         try {
             // Solicitar permissão para acessar a mídia
@@ -90,19 +90,31 @@ export default function HomeScreen() {
                     "Permissão necessária",
                     "Permissão de acesso ao armazenamento é necessária para baixar o APK."
                 );
+
+                setShowDownloadProgress(false);
+
                 return;
             }
 
-            // Certificar-se de que o diretório de download existe
-            const dirInfo = await FileSystem.getInfoAsync(downloadDir);
-            if (!dirInfo.exists) {
-                await FileSystem.makeDirectoryAsync(downloadDir, { intermediates: true });
+            // Usar StorageAccessFramework para salvar na pasta Downloads
+            const directoryUri =
+                await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+
+            if (!directoryUri.granted) {
+                Alert.alert(
+                    "Permissão negada",
+                    "Permissão para acessar o diretório de Downloads foi negada."
+                );
+
+                setShowDownloadProgress(false);
+
+                return;
             }
 
             // Iniciar o download
-            const downloadResumable = await FileSystem.createDownloadResumable(
+            const downloadResumable = FileSystem.createDownloadResumable(
                 uri,
-                fileUri,
+                FileSystem.cacheDirectory + fileName,
                 {},
                 (progress) => {
                     const progressPercentage =
@@ -111,7 +123,15 @@ export default function HomeScreen() {
                 }
             );
 
-            const { uri: localUri } = await downloadResumable.downloadAsync();
+            const { uri: cacheUri } = await downloadResumable.downloadAsync();
+
+            // Mover arquivo para a pasta Downloads usando SAF
+            await FileSystem.StorageAccessFramework.copyAsync({
+                from: cacheUri,
+                to:
+                    "content://com.android.externalstorage.documents/tree/primary/Download/" +
+                    fileName,
+            });
 
             setShowDownloadProgress(false);
             setDownloadProgress(0);
@@ -119,19 +139,22 @@ export default function HomeScreen() {
             Alert.alert("Download Completo", "O APK foi baixado com sucesso.", [
                 {
                     text: "Ok",
-                    onPress: () => openFolder(localUri),
+                    onPress: () => openFolder(directoryUri.uri),
                 },
             ]);
         } catch (e) {
             console.error(e);
+            setShowDownloadProgress(false);
+            setDownloadProgress(0);
+
             Alert.alert("Erro", "Ocorreu um erro ao baixar o APK.");
         }
     }
 
-    async function openFolder(fileUri) {
+    async function openFolder(directoryUri) {
         if (Platform.OS === "android") {
             IntentLauncher.startActivityAsync("android.intent.action.VIEW", {
-                data: "content://com.android.externalstorage.documents/document/primary:Download/",
+                data: directoryUri,
                 flags: 1, // FLAG_GRANT_READ_URI_PERMISSION
             });
         }

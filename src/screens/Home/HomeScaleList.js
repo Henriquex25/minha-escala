@@ -167,17 +167,6 @@ export default function HomeScaleList() {
         return value ? value : "--";
     }
 
-    function getEmployeesFastCollect(item) {
-        const employees = item.fastCollect;
-        const time = "🍝 21:40 às 22:00 / 🛏 02:00 às 03:00";
-        let value = "";
-        employees?.forEach((employee, index) => {
-            value += `${index === 0 ? "" : "\n\n"}${employee.name} ${time}`;
-        });
-
-        return value ? value : "--";
-    }
-
     function getEmployeesObservation(item) {
         const employees = item.observation;
         const time = "🍝 22:00 às 22:20 / 🛏 02:00 às 03:00";
@@ -246,11 +235,9 @@ export default function HomeScaleList() {
             "0" + scale.fastCLM.length
         ).slice(-2)} Func. Fast Clínica Médica*\n${getEmployeesFastCLM(
             scale
-        )}\n___________________\n\n*${("0" + scale.fastCollect.length).slice(
+        )}\n___________________\n\n*${("0" + scale.observation.length).slice(
             -2
-        )} Func. Fast Coleta*\n${getEmployeesFastCollect(scale)}\n___________________\n\n*${(
-            "0" + scale.observation.length
-        ).slice(-2)} Func. Observação*\n${getEmployeesObservation(
+        )} Func. Observação*\n${getEmployeesObservation(
             scale
         )}\n___________________\n\n*Ausências programadas*\n\n*Folgas - ${(
             "0" + scale.daysOff.length
@@ -609,40 +596,6 @@ export default function HomeScaleList() {
                         }
                         onChangeText={(text) =>
                             whenModificationIsInitiated("fastCLM", index, "employees", text)
-                        }
-                    />
-                </View>
-
-                <Divider className="my-3" />
-
-                {/* Fast Coleta */}
-                <View>
-                    <TextInput
-                        readOnly={!editScales[index] === true}
-                        className="font-semibold text-gray-200"
-                        multiline
-                        spellCheck={false}
-                        value={
-                            unsavedChanges[index]?.fastCollect?.label
-                                ? unsavedChanges[index].fastCollect.label
-                                : `${("0" + item.fastCollect.length).slice(-2)} Func. Fast Coleta`
-                        }
-                        onChangeText={(text) =>
-                            whenModificationIsInitiated("fastCollect", index, "label", text)
-                        }
-                    />
-                    <TextInput
-                        readOnly={!editScales[index] === true}
-                        className="text-gray-200"
-                        multiline
-                        spellCheck={false}
-                        value={
-                            unsavedChanges[index]?.fastCollect?.employees
-                                ? unsavedChanges[index].fastCollect.employees
-                                : getEmployeesFastCollect(item)
-                        }
-                        onChangeText={(text) =>
-                            whenModificationIsInitiated("fastCollect", index, "employees", text)
                         }
                     />
                 </View>
