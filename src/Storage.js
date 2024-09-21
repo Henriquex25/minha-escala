@@ -46,22 +46,6 @@ export const allEmployees = [
         },
     },
     {
-        id: 3,
-        name: "Geovana",
-        leadership: false,
-        firstReference: false,
-        secondReference: false,
-        sectors: {
-            receptionC: true,
-            receptionG: true,
-            medicalSupport: false,
-            observation: false,
-            fastCLM: false,
-            fastMedication: true,
-            concierge: false,
-        },
-    },
-    {
         id: 4,
         name: "Gustavo",
         leadership: false,

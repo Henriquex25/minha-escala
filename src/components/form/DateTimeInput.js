@@ -33,15 +33,29 @@ export default function DateTimeInput({
         setShow(true);
     };
 
+    const getFormat = () => {
+        const dt = moment(date);
+
+        if (mode === "date") return dt.format("DD/MM/YYYY");
+        if (mode === "datetime") return dt.format("DD/MM/YYYY HH:mm");
+        if (mode === "time") return dt.format("HH:mm");
+    };
+
+    const getIcon = () => {
+        if (mode === "date" || mode === "datetime") return "calendar-month-outline";
+
+        return "clock-time-five-outline";
+    };
+
     return (
         <SafeAreaView style={{ width: "100%" }}>
             <TextInput
-                value={moment(date).format("DD/MM/YYYY")}
+                value={getFormat()}
                 label={label}
                 onPress={showDateTimepicker}
                 right={
                     <TextInput.Icon
-                        icon="calendar-month-outline"
+                        icon={getIcon()}
                         color={"#6b7280"}
                         onPress={showDateTimepicker}
                     />

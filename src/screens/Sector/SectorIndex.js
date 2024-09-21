@@ -20,7 +20,7 @@ export default function SectorIndex() {
             {/* Botão abrir modal de criação */}
             <TouchableOpacity
                 activeOpacity={0.78}
-                className="h-16 w-16 bg-primary-500 text-gray-200 rounded-full flex justify-center items-center absolute bottom-6 right-5"
+                className="h-12 w-12 bg-primary-500 text-gray-200 rounded-full flex justify-center items-center absolute top-3 right-5"
                 onPress={showModalCreateSector}
             >
                 <Icon source="plus" size={22} color="white" />

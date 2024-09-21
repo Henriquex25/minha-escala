@@ -6,10 +6,12 @@ import EmployeesIndex from "../screens/Employee/EmployeesIndex";
 import { useNavigation } from "@react-navigation/native";
 import HistoryIndex from "../screens/History/HistoryIndex";
 import MonthlyScaleIndex from "../screens/MonthlyScale/MonthlyScaleIndex";
+import SectorIndex from "../screens/Sector/SectorIndex";
 
 const HomeRoute = () => <HomeScreen />;
 const GenerateScaleRoute = () => <GenerateScaleIndex navigation={useNavigation()} />;
 const EmployeeRoute = () => <EmployeesIndex navigation={useNavigation()} />;
+const SectorRoute = () => <SectorIndex navigation={useNavigation()} />;
 const HistoryRoute = () => <HistoryIndex navigation={useNavigation()} />;
 const MonthlyScaleRoute = () => <MonthlyScaleIndex navigation={useNavigation()} />;
 
@@ -20,9 +22,15 @@ const Routes = () => {
         { key: "generateScale", title: "Gerar Escala", focusedIcon: "refresh" },
         {
             key: "employee",
-            title: "Funcionários",
+            title: "Colaboradores",
             focusedIcon: "account-multiple",
             unfocusedIcon: "account-multiple-outline",
+        },
+        {
+            key: "sector",
+            title: "Setores",
+            focusedIcon: "table-account",
+            unfocusedIcon: "table-account",
         },
         {
             key: "history",
@@ -42,6 +50,7 @@ const Routes = () => {
         home: HomeRoute,
         generateScale: GenerateScaleRoute,
         employee: EmployeeRoute,
+        sector: SectorRoute,
         history: HistoryRoute,
         // monthlyScale: MonthlyScaleRoute,
     });

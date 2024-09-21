@@ -88,9 +88,7 @@ export default function SectorCreateForm({ hideModal = () => {} }) {
                 <TextInput
                     label="Nome"
                     onChangeText={setName}
-                    style={{
-                        backgroundColor: "#3a3a40",
-                    }}
+                    style={{ backgroundColor: "#3a3a40", height: 50 }}
                     textColor={"#e5e7eb"}
                     underlineColor={nameValidationError.hasError ? "red" : "#38bdf8"}
                     activeUnderlineColor={nameValidationError.hasError ? "red" : "#0369a1"}
